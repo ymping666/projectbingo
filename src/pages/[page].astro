@@ -1,4 +1,5 @@
 ---
+import { withBase } from '../lib/url';
 import Layout from '../layouts/Layout.astro';
 const pages = {
   'how-to-play': {
@@ -149,7 +150,8 @@ const content = pages[Astro.params.page as keyof typeof pages];
           </>
         </section>
       ))
-    }<a href="/" class="button primary"
-      >Make your Bingo cards <span>↗</span></a>
+    }<a href={withBase('/')} class="button primary"
+      >Make your Bingo cards <span>↗</span></a
+    >
   </article></Layout
 >

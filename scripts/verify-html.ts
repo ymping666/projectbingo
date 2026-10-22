@@ -2,12 +2,13 @@ import { readFile, readdir, access } from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { templates } from '../src/lib/templates';
+const base = (process.env.PUBLIC_BASE_PATH || '/').replace(/\/?$/, '/');
 for (const t of templates) {
   const html = await readFile(`dist/templates/${t.id}/index.html`, 'utf8');
   assert(html.includes(t.name));
   assert(html.includes(t.description));
   for (const w of t.words) assert(html.includes(w), `Missing SSR word ${w}`);
-  assert(html.includes(`/?template=${t.id}`));
+  assert(html.includes(`${base}?template=${t.id}`));
   assert.equal((html.match(/<h1[ >]/g) || []).length, 1);
 }
 const sitemap = await readFile('dist/sitemap.xml', 'utf8');
@@ -29,9 +30,13 @@ async function inspectLinks(directory: string) {
     const html = await readFile(file, 'utf8');
     for (const match of html.matchAll(/(?:href|src)="(\/[^"]*)"/g)) {
       const pathname = match[1].split(/[?#]/)[0];
+      assert(
+        pathname.startsWith(base),
+        `Link outside base ${base}: ${pathname}`,
+      );
       const target = path.join(
         'dist',
-        pathname,
+        pathname.slice(base.length),
         pathname.endsWith('/') ? 'index.html' : '',
       );
       await access(target).catch(() => {

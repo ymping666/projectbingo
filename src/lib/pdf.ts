@@ -1,6 +1,7 @@
 import { PDFDocument, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import type { Project } from './model';
+import { withBase } from './url';
 export type ExportResult = {
   bytes: Uint8Array;
   cardPages: number;
@@ -124,7 +125,7 @@ export async function exportPdf(
   const doc = await PDFDocument.create();
   doc.registerFontkit(fontkit);
   if (!fontBytes) {
-    const response = await fetch('/fonts/Lato-Regular.ttf');
+    const response = await fetch(withBase('/fonts/Lato-Regular.ttf'));
     if (!response.ok)
       throw new Error('The local PDF font could not load. Please try again.');
     fontBytes = new Uint8Array(await response.arrayBuffer());

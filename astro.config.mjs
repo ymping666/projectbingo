@@ -3,6 +3,11 @@ import react from '@astrojs/react';
 import { loadEnv } from 'vite';
 const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '');
 const site = process.env.PUBLIC_SITE_URL || env.PUBLIC_SITE_URL;
+const base = process.env.PUBLIC_BASE_PATH || env.PUBLIC_BASE_PATH || '/';
+if (!/^\/(?:[A-Za-z0-9_-]+\/)*$/.test(base))
+  throw new Error(
+    'PUBLIC_BASE_PATH must be / or a slash-delimited path ending in /.',
+  );
 if (site) {
   const u = new URL(site);
   if (
@@ -26,6 +31,7 @@ if ((process.env.INDEXABLE_BUILD || env.INDEXABLE_BUILD) === 'true' && !site)
   throw new Error('An indexable build requires PUBLIC_SITE_URL.');
 export default defineConfig({
   site,
+  base,
   output: 'static',
   integrations: [react()],
   trailingSlash: 'always',

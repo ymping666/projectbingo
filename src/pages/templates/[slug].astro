@@ -1,4 +1,5 @@
 ---
+import { withBase } from '../../lib/url';
 import Layout from '../../layouts/Layout.astro';
 import { templates, templateDraft } from '../../lib/templates';
 import { generate } from '../../lib/model';
@@ -16,7 +17,7 @@ const p = generate(
 
 <Layout title={`${t.name} Bingo cards`} description={t.description}
   ><div class="breadcrumbs">
-    <a href="/templates/">All templates</a><span>/</span>{t.name}
+    <a href={withBase('/templates/')}>All templates</a><span>/</span>{t.name}
   </div><section class="template-detail">
     <div>
       <div class="eyebrow">{t.category.toUpperCase()}</div><h1>
@@ -26,13 +27,13 @@ const p = generate(
       >
         <span>{t.words.length} words</span><span>{t.size} × {t.size} grid</span
         ><span>Free to customize</span>
-      </div><a class="button primary" href={`/?template=${t.id}`}
+      </div><a class="button primary" href={withBase(`/?template=${t.id}`)}
         >Use this template <span>↗</span></a
       ><h2>At your next gathering</h2><p>{t.tip}</p><p>
         Print one distinct card per player. Call words from this list, and mark
         a full row, column, or diagonal. The optional center FREE space starts
         marked.
-      </p><a href="/how-to-play/">Read the full rules ↗</a>
+      </p><a href={withBase('/how-to-play/')}>Read the full rules ↗</a>
     </div><div class="template-sample">
       <CardView project={p} card={p.cards[0]} /><p>
         One real layout, generated from the word list below.
@@ -58,7 +59,7 @@ const p = generate(
           .filter((other) => other.id !== t.id)
           .slice(0, 3)
           .map((other) => (
-            <a href={`/templates/${other.id}/`}>{other.name} ↗</a>
+            <a href={withBase(`/templates/${other.id}/`)}>{other.name} ↗</a>
           ))
       }
     </div>

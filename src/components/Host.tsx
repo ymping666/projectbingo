@@ -1,3 +1,4 @@
+import { withBase } from '../lib/url';
 import { useState } from 'react';
 import {
   ArrowRight,
@@ -22,7 +23,7 @@ export default function Host() {
       <section className="empty-state">
         <h2>Bring your cards to the table.</h2>
         <p>Create a card set first, or import your saved project JSON.</p>
-        <a className="button primary" href="/">
+        <a className="button primary" href={withBase('/')}>
           Make Bingo cards <ArrowRight size={17} />
         </a>
         <ProjectTools onImport={setProject} onMessage={setMessage} />
@@ -221,7 +222,7 @@ export function HostSession({
           }}
           onMessage={setMessage}
         />
-        <a href="/">Back to card maker ↗</a>
+        <a href={withBase('/')}>Back to card maker ↗</a>
       </div>
       {message && <Notice>{message}</Notice>}
     </>

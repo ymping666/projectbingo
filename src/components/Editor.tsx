@@ -1,3 +1,4 @@
+import { withBase } from '../lib/url';
 import { useEffect, useState } from 'react';
 import {
   ArrowRight,
@@ -400,7 +401,7 @@ export default function Editor({ initial }: { initial: Project }) {
               Download cards only <Download size={14} />
             </button>
             <a
-              href="/host/"
+              href={withBase('/host/')}
               onClick={(e) => {
                 e.preventDefault();
                 setHosting(true);
@@ -412,7 +413,7 @@ export default function Editor({ initial }: { initial: Project }) {
           </div>
           <p className="print-tip">
             Print at Actual size (100%).{' '}
-            <a href="/printing-guide/">Printing tips ↗</a>
+            <a href={withBase('/printing-guide/')}>Printing tips ↗</a>
           </p>
         </div>
         <div className="local-bar">

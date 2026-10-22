@@ -1,4 +1,5 @@
 ---
+import { withBase } from '../../lib/url';
 import Layout from '../../layouts/Layout.astro';
 import { templates } from '../../lib/templates';
 import AdSlot from '../../components/AdSlot.astro';
@@ -16,7 +17,10 @@ import AdSlot from '../../components/AdSlot.astro';
   </section><div class="template-directory">
     {
       templates.map((t, i) => (
-        <a class={`directory-card tone-${i % 4}`} href={`/templates/${t.id}/`}>
+        <a
+          class={`directory-card tone-${i % 4}`}
+          href={withBase(`/templates/${t.id}/`)}
+        >
           <>
             <div class="directory-top">
               <>

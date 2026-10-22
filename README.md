@@ -40,6 +40,8 @@ Core tests cover minimum pools, 200 distinct layouts, FREE typing, exact line ca
 
 ## Static deployment
 
+GitHub Pages is deployed by `.github/workflows/pages.yml` after tests and static-link verification. It uses `PUBLIC_BASE_PATH=/projectbingo/` so navigation, Astro assets, fonts, and PDF export work beneath the repository path. This acceptance deployment deliberately keeps indexing disabled until a production domain is selected. A push to `main` updates the Pages site automatically.
+
 Upload `dist/` to Cloudflare Pages, with build command `npm run build`, output `dist`, and this folder as the project root. Alternatively use Cloudflare Workers static assets with the included `wrangler.jsonc`; no Worker business API, SSR, or database is required. `_headers` and `404.html` are included. Other static hosts must serve directory indexes and return the actual 404 page/status for unknown paths.
 
 Until a real production domain is configured, builds are deliberately noindex, omit canonicals, disallow crawling, and emit an empty sitemap. For an indexable production build set both `PUBLIC_SITE_URL` to your real HTTPS origin and `INDEXABLE_BUILD=true`. The build rejects missing or obvious placeholder/preview domains. The `/host/` page remains noindex and outside the sitemap. No user content goes in public routes.
