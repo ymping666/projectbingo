@@ -105,7 +105,8 @@ export function ProjectTools({
           download(
             JSON.stringify(project, null, 2),
             `bingo-${project.id}.json`,
-            'application/json',
+            // Force a file download in embedded browsers that preview JSON MIME types.
+            'application/octet-stream',
           )
         }
       >
