@@ -1,3 +1,5 @@
+import type { GameMode } from './model';
+import { expansionTemplates, activityPresets } from './expansion';
 export type Template = {
   id: string;
   name: string;
@@ -7,6 +9,10 @@ export type Template = {
   description: string;
   tip: string;
   words: string[];
+  mode?: GameMode;
+  notes?: string[];
+  source?: { label: string; url: string };
+  relatedIds?: string[];
   variants?: { id: string; name: string; words: string[] }[];
 };
 const list = (s: string) => s.split('|');
@@ -201,7 +207,10 @@ export const templates: Template[] = [
       'Thanksgiving|Gratitude|Thankful|Family|Friends|Gathering|Guest|Welcome|Table|Tablecloth|Napkin|Plate|Bowl|Fork|Spoon|Turkey|Stuffing|Gravy|Mashed potatoes|Sweet potato|Cranberry|Corn|Green beans|Bread roll|Pumpkin|Pumpkin pie|Apple pie|Harvest|Autumn|Leaf|Acorn|Basket',
     ),
   },
+  ...expansionTemplates,
 ];
+export { activityPresets };
+export const allPresets = [...templates, ...activityPresets];
 export const food = templates[0];
 export function templateDraft(t: Template, variant?: string) {
   const preset = t.variants?.find((v) => v.id === variant) || t.variants?.[0];
@@ -212,5 +221,6 @@ export function templateDraft(t: Template, variant?: string) {
     free: true,
     count: 40,
     templateId: t.id,
+    mode: t.mode || 'called',
   };
 }

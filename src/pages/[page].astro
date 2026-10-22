@@ -107,7 +107,7 @@ const pages = {
       ],
       [
         'What the browser saves',
-        'We use localStorage to keep the latest project, including the word pool, real card matrices, print settings, calling order, and current progress. Browser storage can fail or be cleared. Save the JSON if the activity matters to you. It contains your content, so share the file only with people you choose.',
+        'The independent caller saves its pool, order and progress under separate browser-storage keys; imported caller projects are also separate from the card maker. Handwritten people-card names are never entered or collected by this site. We use localStorage to keep the latest card-maker project, including the word pool, real card matrices, print settings, calling order, and current progress. Browser storage can fail or be cleared. Save the JSON if the activity matters to you. It contains your content, so share the file only with people you choose.',
       ],
       [
         'Imports and downloads',
@@ -148,6 +148,10 @@ const content = pages[Astro.params.page as keyof typeof pages];
       {content.intro}
     </p>
   </section><article class="article">
+    <p>
+      <a href={withBase('/bingo-caller/')}>Use the independent word caller</a> ·
+      <a href={withBase('/educational-bingo/')}>Choose a learning activity</a>
+    </p>
     {
       content.sections.map(([heading, text]) => (
         <section>

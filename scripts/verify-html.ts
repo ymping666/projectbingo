@@ -1,6 +1,7 @@
 import { readFile, readdir, access } from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import { publicPaths } from '../src/lib/routes';
 import { templates } from '../src/lib/templates';
 import { featuredIds, sampleFilename } from '../src/lib/samples';
 const preview = process.argv[2] === 'preview';
@@ -77,7 +78,24 @@ assert(!sitemap.includes('github.io'));
 const locations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
   (m) => m[1],
 );
-assert.equal(locations.length, indexable ? templates.length + 8 : 0);
+assert.equal(locations.length, indexable ? publicPaths.length : 0);
+assert.equal(new Set(locations).size, locations.length);
+assert(publicPaths.length >= 50);
+const allHtml = await Promise.all(
+  publicPaths.map(async (route) => ({
+    route,
+    html: await readFile(path.join(directory, route, 'index.html'), 'utf8'),
+  })),
+);
+for (const route of publicPaths.filter((p) => p !== '/'))
+  assert(
+    allHtml.some(
+      (page) =>
+        page.route !== route &&
+        page.html.includes(`href="${base}${route.slice(1)}"`),
+    ),
+    `Orphan page ${route}`,
+  );
 for (const url of locations) {
   assert(url.startsWith(origin + '/'));
   await access(path.join(directory, new URL(url).pathname, 'index.html'));

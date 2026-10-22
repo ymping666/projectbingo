@@ -144,7 +144,9 @@ export function CardView({
 }) {
   const words = new Map(project.words.map((w) => [w.id, w.text]));
   return (
-    <div className={`bingo-card theme-${project.print.theme}`}>
+    <div
+      className={`bingo-card theme-${project.print.theme} mode-${project.mode || 'called'}`}
+    >
       <div className="card-title">{project.title}</div>
       <div className="bingo-heading" aria-hidden="true">
         B I N G O
@@ -179,6 +181,9 @@ export function CardView({
                 }
               >
                 {words.get(c.wordId)}
+                {project.mode === 'people' && (
+                  <small className="name-line">Name: __________</small>
+                )}
               </span>
             )}
             {hits?.[i] && c.kind !== 'free' && (

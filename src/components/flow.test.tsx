@@ -298,3 +298,75 @@ it('loads lowercase as a draft, switches uppercase without touching printed card
   expect(window.confirm).toHaveBeenCalled();
   expect(stored().id).toBe(original.id);
 });
+import CallerTool from './Caller';
+import { CALLER_KEY } from '../lib/caller';
+it('runs and restores the independent caller without changing an existing card project', async () => {
+  const user = userEvent.setup();
+  const saved = JSON.stringify(initial());
+  localStorage.setItem(STORAGE_KEY, saved);
+  const view = render(<CallerTool />);
+  await user.click(screen.getByLabelText('Caller word list'));
+  await user.paste(
+    Array.from({ length: 30 }, (_, i) => `Caller word ${i + 1}`).join('\n'),
+  );
+  await user.click(screen.getByRole('button', { name: 'Start' }));
+  await user.click(screen.getByRole('button', { name: 'Next word' }));
+  const first = JSON.parse(localStorage.getItem(CALLER_KEY)!).order[0];
+  expect(
+    screen.getByText(first, { selector: '.caller-display' }),
+  ).toBeDefined();
+  await user.click(screen.getByRole('button', { name: 'Undo' }));
+  await user.click(screen.getByRole('button', { name: 'Next word' }));
+  expect(
+    screen.getByText(first, { selector: '.caller-display' }),
+  ).toBeDefined();
+  view.unmount();
+  render(<CallerTool />);
+  await screen.findByText('29 remaining · 1 of 30 called');
+  expect(localStorage.getItem(STORAGE_KEY)).toBe(saved);
+  await user.click(screen.getByRole('button', { name: 'Restart' }));
+  await screen.findByText('30 remaining · 0 of 30 called');
+  expect(localStorage.getItem(STORAGE_KEY)).toBe(saved);
+  const legacy = readFileSync(
+    'src/lib/fixtures/legacy-project-v1.json',
+    'utf8',
+  );
+  await user.upload(
+    screen.getByLabelText('Import project JSON'),
+    new File([legacy], 'project.json', { type: 'application/json' }),
+  );
+  await screen.findByText('Project imported. Your cards and round are ready.');
+  expect(localStorage.getItem(STORAGE_KEY)).toBe(saved);
+  expect(screen.getByRole('button', { name: /Next word/ })).toBeDefined();
+});
+it('generates observed and people presets with matching print flow and no primary host action', async () => {
+  const user = userEvent.setup();
+  for (const id of ['office-buzzword-bingo', 'office-icebreaker']) {
+    const view = render(<Editor initial={initial()} />);
+    await screen.findByText('Saved on this browser');
+    await user.selectOptions(
+      screen.getByLabelText(/Start with a template/),
+      id,
+    );
+    const count = screen.getByLabelText('Number of cards');
+    await user.clear(count);
+    await user.type(count, '2');
+    await user.click(
+      screen.getByRole('button', { name: /Generate new card set/ }),
+    );
+    await screen.findByText(/Created 2 distinct card layouts/);
+    expect(stored().mode).toBe(
+      id === 'office-icebreaker' ? 'people' : 'observed',
+    );
+    expect(screen.queryByRole('link', { name: /Start hosting/ })).toBeNull();
+    if (id === 'office-icebreaker') expect(stored().print.perPage).toBe(1);
+    await user.click(
+      screen.getByRole('button', { name: 'Download activity pack' }),
+    );
+    await screen.findByText(/PDF ready/);
+    expect(
+      (await PDFDocument.load(await blobBytes(blobs.at(-1)!))).getPageCount(),
+    ).toBeGreaterThan(2);
+    view.unmount();
+  }
+}, 20000);

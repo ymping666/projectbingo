@@ -1,7 +1,8 @@
-import { templates } from './templates';
+import { presetIds, publicPaths } from './routes';
 import { productionBuild, productionOrigin } from './deployment';
 import type { Project } from './model';
 export type AnalyticsEvent =
+  | 'caller_start'
   | 'sample_download'
   | 'template_used'
   | 'generation_success'
@@ -20,6 +21,7 @@ export type EventInput = {
 };
 export type SafePayload = Record<string, string | number | boolean>;
 const events = new Set<AnalyticsEvent>([
+  'caller_start',
   'sample_download',
   'template_used',
   'generation_success',
@@ -28,7 +30,7 @@ const events = new Set<AnalyticsEvent>([
   'host_start',
   'project_import_success',
 ]);
-const knownTemplates = new Set(templates.map((t) => t.id));
+const knownTemplates = new Set(presetIds);
 const errors = new Set([
   'font_load',
   'unsupported_glyph',
@@ -36,18 +38,7 @@ const errors = new Set([
   'download_error',
   'export_failed',
 ]);
-const routes = new Set([
-  '/',
-  '/templates/',
-  '/blank-bingo-cards/',
-  '/classroom-bingo/',
-  '/about/',
-  '/privacy/',
-  '/how-to-play/',
-  '/printing-guide/',
-  '/host/',
-  ...templates.map((t) => `/templates/${t.id}/`),
-]);
+const routes = new Set([...publicPaths, '/host/']);
 export function safeParameters(input: EventInput = {}): SafePayload {
   const result: SafePayload = {};
   if (

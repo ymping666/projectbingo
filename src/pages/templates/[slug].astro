@@ -12,7 +12,7 @@ export function getStaticPaths() {
 const { t } = Astro.props;
 const p = sampleProject(t);
 const content = featured[t.id];
-const recommendations = (related[t.id] || []).map(
+const recommendations = (t.relatedIds || related[t.id] || []).map(
   (id) => templates.find((other) => other.id === id)!,
 );
 ---
@@ -35,16 +35,52 @@ const recommendations = (related[t.id] || []).map(
         data-template-use={t.id}
         data-template-size={t.size}>Use this template <span>↗</span></a
       ><h2>At your next gathering</h2><p>{t.tip}</p><p>
-        Print one distinct card per player. Call words from this list, and mark
-        a full row, column, or diagonal. The optional center FREE space starts
-        marked.
+        {
+          t.mode === 'observed'
+            ? 'Print different layouts, then mark matching events or phrases as you observe them. Agree on matches and confirm lines manually. No random website calling or automatic event verification is needed.'
+            : 'Print one distinct card per player. Call words from this list and mark a full row, column or diagonal. The optional FREE center starts marked.'
+        }
       </p><a href={withBase('/how-to-play/')}>Read the full rules ↗</a>
     </div><div class="template-sample">
       <CardView project={p} card={p.cards[0]} /><p>
-        Sample card. Generate your own activity before hosting.
+        Sample card. {
+          t.mode === 'observed'
+            ? 'Generate your own cards before playing by observation.'
+            : 'Generate your own activity before hosting.'
+        }
       </p>
     </div>
   </section>
+  {
+    t.notes && (
+      <article class="article">
+        {t.notes.map((note: string, i: number) => (
+          <section>
+            <h2>
+              {
+                [
+                  'Purpose and preparation',
+                  'Play this activity',
+                  'Grid and printing choices',
+                ][i]
+              }
+            </h2>
+            <p>{note}</p>
+          </section>
+        ))}
+        {t.source && (
+          <p>
+            Source: <a href={t.source.url}>{t.source.label}</a>
+          </p>
+        )}
+        <p>
+          After editing, generation validates the actual deduplicated pool. 5 ×
+          5 needs 24 distinct entries with FREE or 25 without it; 3 × 3 needs
+          eight or nine.
+        </p>
+      </article>
+    )
+  }
   {
     content && (
       <article class="article template-notes">
@@ -181,6 +217,30 @@ const recommendations = (related[t.id] || []).map(
       </section>
     )
   }
+  {
+    t.notes && (
+      <section class="article">
+        <>
+          <h2>Inspect a fixed sample</h2>
+          <p>
+            This A4 PDF contains two example cards, a checklist and rules. It is
+            separate from your saved activity.{' '}
+            {t.mode === 'observed'
+              ? 'Play by observation and confirm wins manually.'
+              : 'To use the web host, generate your own cards and retain that project JSON.'}
+          </p>
+          <a
+            class="button secondary"
+            href={withBase(`/samples/${sampleFilename(t.id)}`)}
+            download
+            data-sample-download={t.id}
+          >
+            Download sample PDF
+          </a>
+        </>
+      </section>
+    )
+  }
   <section class="word-pool">
     <div class="section-title">
       <div>
@@ -197,7 +257,8 @@ const recommendations = (related[t.id] || []).map(
       page.
     </p><p>
       <a href={withBase('/classroom-bingo/')}>Plan a classroom game</a> · <a
-        href={withBase('/blank-bingo-cards/')}>Print handwriting grids</a>
+        href={withBase('/blank-bingo-cards/')}>Print handwriting grids</a
+      >
     </p><h2>Keep exploring</h2><div class="related-links">
       {
         recommendations.map((other) => (
@@ -205,5 +266,18 @@ const recommendations = (related[t.id] || []).map(
         ))
       }
     </div>
+    <p>
+      <a href={withBase('/educational-bingo/')}>Choose a learning goal</a> · <a
+        href={withBase('/holiday-bingo/')}>Browse seasons and celebrations</a
+      > · <a
+        href={withBase(
+          t.mode === 'observed' ? '/office-icebreaker-bingo/' : '/esl-bingo/',
+        )}
+        >{
+          t.mode === 'observed'
+            ? 'Organize an icebreaker'
+            : 'Plan vocabulary practice'
+        }</a>
+    </p>
   </section><AdSlot /></Layout
 >

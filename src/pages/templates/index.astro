@@ -1,9 +1,10 @@
 ---
 import { withBase } from '../../lib/url';
 import Layout from '../../layouts/Layout.astro';
-import { templates } from '../../lib/templates';
+import { activityPresets, templates } from '../../lib/templates';
 import { sampleProject } from '../../lib/samples';
 import { CardView } from '../../components/shared';
+import { guides } from '../../lib/guides';
 import AdSlot from '../../components/AdSlot.astro';
 ---
 
@@ -21,61 +22,111 @@ import AdSlot from '../../components/AdSlot.astro';
     <a href={withBase('/classroom-bingo/')}
       >Choose and organize a classroom activity</a
     > · <a href={withBase('/blank-bingo-cards/')}
-      >Download blank handwriting cards</a>
+      >Download blank handwriting cards</a
+    >
   </p>
   {
-    ['Classroom vocabulary', 'Letters and numbers', 'Celebrations'].map(
-      (group) => (
-        <section>
+    [
+      'Classroom & learning',
+      'Everyday vocabulary',
+      'Holidays & celebrations',
+      'Activities',
+    ].map((group) => (
+      <section>
+        <>
           <>
             <h2 class="directory-category">{group}</h2>
-            <div class="template-directory">
-              {templates
-                .filter((t) =>
-                  group === 'Classroom vocabulary'
-                    ? !['Letters and numbers', 'Celebrations'].includes(
-                        t.category,
-                      )
-                    : t.category === group,
-                )
-                .map((t, i) => (
-                  <a
-                    class={`directory-card tone-${i % 4}`}
-                    href={withBase(`/templates/${t.id}/`)}
-                  >
-                    <>
-                      <div class="directory-top">
-                        <>
-                          <span class="template-icon">{t.icon}</span>
-                          <span class="small-pill">{t.category}</span>
-                        </>
-                      </div>
-                      <div
-                        class="directory-preview"
-                        aria-label={`${t.name} sample ${t.size} by ${t.size} card`}
-                      >
-                        <CardView
-                          project={sampleProject(t)}
-                          card={sampleProject(t).cards[0]}
-                        />
-                      </div>
-                      <h3>{t.name}</h3>
-                      <p>{t.description}</p>
-                      <div class="directory-bottom">
-                        <>
-                          <span>
-                            {t.words.length} words · {t.size} × {t.size}
-                          </span>
-                          <strong>Take a look ↗</strong>
-                        </>
-                      </div>
-                    </>
-                  </a>
-                ))}
-            </div>
+            <p>
+              {group === 'Classroom & learning'
+                ? 'Choose a recognition, reading or phonics task. Grid size follows your actual word pool.'
+                : group === 'Everyday vocabulary'
+                  ? 'Review familiar topics with clear word calls, then add discussion or definition clues.'
+                  : group === 'Holidays & celebrations'
+                    ? 'Choose a seasonal table activity and adapt the words for your guests.'
+                    : 'Observe phrases or events instead of drawing random words. Confirm wins manually.'}
+            </p>
           </>
-        </section>
-      ),
-    )
-  }<AdSlot /></Layout
+          <div class="template-directory">
+            {templates
+              .filter((t) =>
+                group === 'Classroom & learning'
+                  ? ['Sight words', 'Phonics', 'Letters and numbers'].includes(
+                      t.category,
+                    ) ||
+                    ['sight-word-bingo', 'classroom-objects-bingo'].includes(
+                      t.id,
+                    )
+                  : group === 'Holidays & celebrations'
+                    ? t.category === 'Celebrations'
+                    : group === 'Activities'
+                      ? t.mode === 'observed'
+                      : ![
+                          'Sight words',
+                          'Phonics',
+                          'Letters and numbers',
+                          'Celebrations',
+                          'Activities',
+                        ].includes(t.category) &&
+                        ![
+                          'sight-word-bingo',
+                          'classroom-objects-bingo',
+                        ].includes(t.id),
+              )
+              .map((t, i) => (
+                <a
+                  class={`directory-card tone-${i % 4}`}
+                  href={withBase(`/templates/${t.id}/`)}
+                >
+                  <>
+                    <div class="directory-top">
+                      <>
+                        <span class="template-icon">{t.icon}</span>
+                        <span class="small-pill">{t.category}</span>
+                      </>
+                    </div>
+                    <div
+                      class="directory-preview"
+                      aria-label={`${t.name} sample ${t.size} by ${t.size} card`}
+                    >
+                      <CardView
+                        project={sampleProject(t)}
+                        card={sampleProject(t).cards[0]}
+                      />
+                    </div>
+                    <h3>{t.name}</h3>
+                    <p>{t.description}</p>
+                    <div class="directory-bottom">
+                      <>
+                        <span>
+                          {t.words.length} words · {t.size} × {t.size}
+                        </span>
+                        <strong>Take a look ↗</strong>
+                      </>
+                    </div>
+                  </>
+                </a>
+              ))}
+          </div>
+        </>
+      </section>
+    ))
+  }<section class="article">
+    <h2>More ways to play</h2><div class="related-links">
+      {
+        [
+          'educational-bingo',
+          'holiday-bingo',
+          'esl-bingo',
+          'family-bingo',
+          'office-icebreaker-bingo',
+          'baby-shower-bingo',
+          'nature-bingo',
+        ].map((slug) => (
+          <a href={withBase(`/${slug}/`)}>
+            {guides.find((g) => g.slug === slug)?.title || slug} ↗
+          </a>
+        ))
+      }
+    </div>
+  </section><AdSlot /></Layout
 >

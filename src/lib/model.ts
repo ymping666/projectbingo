@@ -1,3 +1,4 @@
+export type GameMode = 'called' | 'observed' | 'people';
 export type Word = { id: string; text: string };
 export type Cell = { kind: 'word'; wordId: string } | { kind: 'free' };
 export type Card = { id: string; cells: Cell[] };
@@ -13,6 +14,7 @@ export type Project = {
   title: string;
   createdAt: string;
   templateId?: string;
+  mode?: GameMode;
   words: Word[];
   size: 3 | 5;
   free: boolean;
@@ -27,6 +29,7 @@ export type Draft = {
   free: boolean;
   count: number;
   templateId?: string;
+  mode?: GameMode;
 };
 export const STORAGE_KEY = 'bingo-print-kit:v1';
 export const MAX_FILE = 2 * 1024 * 1024;
@@ -91,6 +94,10 @@ export function generate(
     Number.isInteger(d.count) && d.count >= 1 && d.count <= 200,
     'Card count must be a whole number from 1 to 200.',
   );
+  assert(
+    d.mode === undefined || ['called', 'observed', 'people'].includes(d.mode),
+    'Invalid activity mode.',
+  );
   const { texts } = normalize(d.text);
   const need = d.size ** 2 - Number(d.free);
   assert(
@@ -129,6 +136,7 @@ export function generate(
     title,
     createdAt: new Date().toISOString(),
     templateId: d.templateId,
+    mode: d.mode || 'called',
     words,
     size: d.size,
     free: d.free,
@@ -320,7 +328,14 @@ export function parseProject(text: string): Project {
       p.round.cursor <= ids.size,
     'Invalid calling order or progress.',
   );
-  assert(p.round.started === undefined || typeof p.round.started === 'boolean', 'Invalid round started flag.');
+  assert(
+    p.round.started === undefined || typeof p.round.started === 'boolean',
+    'Invalid round started flag.',
+  );
+  assert(
+    p.mode === undefined || ['called', 'observed', 'people'].includes(p.mode),
+    'Invalid activity mode.',
+  );
   // Return only known fields, never persist arbitrary imported properties.
   return {
     schemaVersion: 1,
@@ -329,6 +344,7 @@ export function parseProject(text: string): Project {
     title: p.title,
     createdAt: p.createdAt,
     templateId: p.templateId,
+    mode: p.mode || 'called',
     size: p.size,
     free: p.free,
     words: p.words.map((w: Word) => ({ id: w.id, text: w.text })),
@@ -361,5 +377,6 @@ export function draftOf(p: Project): Draft {
     free: p.free,
     count: p.cards.length,
     templateId: p.templateId,
+    mode: p.mode || 'called',
   };
 }

@@ -1,0 +1,101 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { withBase } from '../lib/url';
+import { allPresets } from '../lib/templates';
+import { guides } from '../lib/guides';
+import { sampleProject } from '../lib/samples';
+import { CardView } from './shared';
+const g = guides.find((g) => g.slug === Astro.props.slug)!;
+const t = allPresets.find((t) => t.id === g.preset);
+const p = t ? sampleProject(t) : undefined;
+const linkPath = (id: string) =>
+  withBase(id.startsWith('/') ? id : `/templates/${id}/`);
+---
+
+<Layout title={g.title} description={g.description}
+  ><section class="page-intro">
+    <div class="eyebrow">PLAN AN ACTIVITY</div><h1>{g.title}</h1><p>
+      {g.description}
+    </p>
+  </section>
+  {
+    t && p && (
+      <section class="template-detail">
+        <>
+          <div>
+            <>
+              <h2>Start with {t.name}</h2>
+              <p>{t.tip}</p>
+              <a
+                class="button primary"
+                href={withBase(`/?template=${t.id}`)}
+                data-template-use={t.id}
+                data-template-size={t.size}
+              >
+                Customize and print this activity ↗
+              </a>
+              <p>
+                The preset opens as ungenerated edits. Save your current project
+                before confirming a replacement.{' '}
+                {t.mode === 'people'
+                  ? 'Choose one card per sheet in Print setup for room to write names.'
+                  : ''}
+              </p>
+              <p>
+                {t.words.length} entries · {t.size} × {t.size} default ·{' '}
+                {t.mode || 'called'} activity
+              </p>
+            </>
+          </div>
+          <div class="template-sample">
+            <>
+              <CardView project={p} card={p.cards[0]} />
+              <p>
+                Fixed sample preview. Generate your own cards before playing.{' '}
+                {t.mode && t.mode !== 'called'
+                  ? 'Confirm observations and wins manually.'
+                  : 'Host only your own generated set.'}
+              </p>
+            </>
+          </div>
+        </>
+      </section>
+    )
+  }
+  <article class="article">
+    {
+      g.sections.map((s) => (
+        <section>
+          <p>{s.text}</p>
+          {s.links && (
+            <div class="related-links">
+              {s.links.map(([id, label]) => (
+                <a href={linkPath(id)}>{label} ↗</a>
+              ))}
+            </div>
+          )}
+        </section>
+      ))
+    }
+  </article>
+  {
+    t && (
+      <section class="word-pool">
+        <>
+          <h2>The starting pool</h2>
+          <ul>
+            {t.words.map((w) => (
+              <li>{w}</li>
+            ))}
+          </ul>
+        </>
+      </section>
+    )
+  }
+  <p class="honest-note">
+    <a href={withBase('/templates/')}>Browse templates</a> · <a
+      href={withBase('/educational-bingo/')}>Learning goals</a
+    > · <a href={withBase('/holiday-bingo/')}>Seasons and celebrations</a> · <a
+      href={withBase('/blank-bingo-cards/')}>Blank handwriting cards</a>
+  </p></Layout
+>

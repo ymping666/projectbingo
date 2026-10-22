@@ -1,4 +1,5 @@
 import { generate } from './model';
+import { expansionTemplates } from './expansion';
 import { templateDraft, type Template } from './templates';
 
 export const featuredIds = [
@@ -9,6 +10,7 @@ export const featuredIds = [
   'alphabet-bingo',
   'numbers-1-20-bingo',
   'thanksgiving-bingo',
+  ...expansionTemplates.map((t) => t.id),
 ];
 export function sampleProject(t: Template, variant?: string) {
   let seed = 173 + t.words.length;
@@ -25,7 +27,12 @@ export function sampleProject(t: Template, variant?: string) {
           'ABC00001',
           '12300001',
           '7AA00001',
-        ][featuredIds.indexOf(t.id)] || 'EAA00001';
+        ][featuredIds.indexOf(t.id)] ||
+        [...t.id]
+          .reduce((h, c) => (Math.imul(h, 31) + c.charCodeAt(0)) >>> 0, 173)
+          .toString(16)
+          .padStart(8, '0')
+          .toUpperCase();
   const p = generate(
     {
       ...templateDraft(t, variant),

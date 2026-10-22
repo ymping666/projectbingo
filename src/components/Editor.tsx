@@ -19,7 +19,7 @@ import {
   type Draft,
   type Print,
 } from '../lib/model';
-import { templates, templateDraft } from '../lib/templates';
+import { allPresets as templates, templateDraft } from '../lib/templates';
 import { track, projectParameters, exportErrorCode } from '../lib/analytics';
 import { CardView, ProjectTools, Notice, useProject, download } from './shared';
 import { HostSession } from './Host';
@@ -80,7 +80,12 @@ export default function Editor({ initial }: { initial: Project }) {
       `Create a new activity? This replaces “${p.title}” (${p.id}), creates new card IDs, and resets the calling round. Previously printed cards still belong to the old project. Save its JSON first to keep it.`,
     );
   function createDraftSnapshot() {
-    const next = generate(draft, p.print);
+    const next = generate(
+      draft,
+      draft.mode === 'people' && p.mode !== 'people'
+        ? { ...p.print, perPage: 1 }
+        : p.print,
+    );
     setProject(next);
     setDraft(draftOf(next));
     setIndex(0);
@@ -237,6 +242,23 @@ export default function Editor({ initial }: { initial: Project }) {
               </p>
             </fieldset>
           )}
+          <label htmlFor="mode">Activity rules</label>
+          <select
+            id="mode"
+            value={draft.mode || 'called'}
+            onChange={(e) => update('mode', e.target.value as Draft['mode'])}
+          >
+            <option value="called">Called words</option>
+            <option value="observed">Observed events</option>
+            <option value="people">Find people (names on paper)</option>
+          </select>
+          <p className="field-help">
+            {draft.mode === 'people'
+              ? 'Print cards with name lines. Meet people and confirm wins manually; no names are entered here. New people activities start with one card per sheet for handwriting; change Print setup after generating if needed.'
+              : draft.mode === 'observed'
+                ? 'Print and mark events as they happen. The website cannot detect or verify real-world events.'
+                : 'Call words from the saved activity and check card IDs.'}
+          </p>
           <label htmlFor="title">Card title</label>
           <input
             id="title"
@@ -528,25 +550,31 @@ export default function Editor({ initial }: { initial: Project }) {
             <Download size={18} />
             {busy && busy !== 'Generating cards'
               ? `${busy}… ${progress}%`
-              : 'Download game pack'}
+              : p.mode && p.mode !== 'called'
+                ? 'Download activity pack'
+                : 'Download game pack'}
             <ArrowRight size={18} />
           </button>
           <p className="pack-description">
-            Your cards + caller word list + quick rules
+            {p.mode && p.mode !== 'called'
+              ? 'Your cards + activity checklist + manual rules'
+              : 'Your cards + caller word list + quick rules'}
           </p>
           <div className="secondary-actions">
             <button disabled={!!busy || !ready} onClick={() => void pdf(false)}>
               Download cards only <Download size={14} />
             </button>
-            <a
-              href={withBase('/host/')}
-              onClick={(e) => {
-                e.preventDefault();
-                setHosting(true);
-              }}
-            >
-              Start hosting <ExternalLink size={14} />
-            </a>
+            {(!p.mode || p.mode === 'called') && (
+              <a
+                href={withBase('/host/')}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setHosting(true);
+                }}
+              >
+                Start hosting <ExternalLink size={14} />
+              </a>
+            )}
           </div>
           <p className="print-tip">
             Print at Actual size (100%).{' '}

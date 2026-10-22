@@ -111,11 +111,15 @@ const path = routePath(Astro.url.pathname);
       <a class="footer-brand" href={withBase('/')}
         >Bingo Card Kit <span>A little prep. A lot of play.</span></a
       ><div>
-        <a href={withBase('/blank-bingo-cards/')}>Blank cards</a><a
-          href={withBase('/classroom-bingo/')}>For teachers</a
-        ><a href={withBase('/printing-guide/')}>Printing guide</a><a
-          href={withBase('/about/')}>About</a
-        ><a href={withBase('/privacy/')}>Privacy</a>{
+        <a href={withBase('/how-to-play/')}>How to play</a><a
+          href={withBase('/holiday-bingo/')}>Holiday Bingo</a
+        ><a href={withBase('/family-bingo/')}>Family Bingo</a><a
+          href={withBase('/blank-bingo-cards/')}>Blank cards</a
+        ><a href={withBase('/classroom-bingo/')}>For teachers</a><a
+          href={withBase('/printing-guide/')}>Printing guide</a
+        ><a href={withBase('/about/')}>About</a><a href={withBase('/privacy/')}
+          >Privacy</a
+        >{
           config.contactEmail && (
             <a href={`mailto:${config.contactEmail}`}>Contact</a>
           )

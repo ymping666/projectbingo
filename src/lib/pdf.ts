@@ -190,16 +190,32 @@ export async function exportPdf(
         borderColor: ink,
         borderWidth: 0.6,
       });
+      const people = p.mode === 'people' && c.kind !== 'free';
       centered(
         page!,
         font,
         c.kind === 'free' ? 'FREE' : wordMap.get(c.wordId)!,
         cx,
-        cy,
+        cy + (people ? cell * 0.32 : 0),
         cell,
-        cell,
+        people ? cell * 0.68 : cell,
         p.size === 3 ? 19 : 16,
       );
+      if (people) {
+        page!.drawLine({
+          start: { x: cx + 9, y: cy + cell * 0.16 },
+          end: { x: cx + cell - 9, y: cy + cell * 0.16 },
+          thickness: 0.5,
+          color: ink,
+        });
+        page!.drawText('Name', {
+          x: cx + 9,
+          y: cy + cell * 0.2,
+          size: 8,
+          font,
+          color: ink,
+        });
+      }
     }
     progress(Math.round(((i + 1) / p.cards.length) * 90));
     if (i % 8 === 7) await breathe();
@@ -217,7 +233,9 @@ export async function exportPdf(
       });
       y -= 39;
     };
-    heading('Caller word list');
+    heading(
+      p.mode && p.mode !== 'called' ? 'Activity checklist' : 'Caller word list',
+    );
     caller.drawText(`Project ${p.id}  /  ${p.words.length} words`, {
       x: margin,
       y: y - 10,
@@ -260,18 +278,29 @@ export async function exportPdf(
     }
     const rules = doc.addPage([pw, ph]);
     y = ph - margin;
-    const paragraphs = [
-      `How to play: ${p.title}`,
-      `Project ${p.id}. These instructions belong to this exact set of ${p.cards.length} cards.`,
-      '1. Give every player a card and something to mark it with. Keep the full card ID visible.',
-      '2. Open this project in the web host, or call words from the printed list in a random order. Call each word only once per round.',
-      `3. Players mark matching words. ${p.free ? 'The center FREE space is already marked.' : 'Every space needs a matching called word.'}`,
-      '4. A complete horizontal row, vertical column, or either full diagonal satisfies the Bingo rule. No full-card rule is used.',
-      '5. A player who has a line can call Bingo. Enter their full card ID in the web host to check the marked cells and completed lines.',
-      'Web checks use only the calls recorded in the current web round. A manual paper call is not recorded automatically. Meeting the line rule does not prove who was first, and multiple players can win together.',
-      'Start a new round to clear calls and shuffle a new calling order while keeping the same cards. Save your project JSON to continue on another device.',
-      'Printing: choose the matching paper size, portrait orientation, and Actual size / 100%. Turn off extra scaling. Check one sheet before printing the full batch.',
-    ];
+    const paragraphs =
+      p.mode && p.mode !== 'called'
+        ? [
+            `How to play: ${p.title}`,
+            p.mode === 'people'
+              ? 'Meet people who match the prompts. Ask before writing a name on the printed line. Anyone can pass. Decide in advance whether a name may appear more than once. Do not enter names on the website.'
+              : 'Observe events or items during the agreed activity. Mark a matching entry only when it happens. Agree on what counts before play. The website does not detect real-world events.',
+            `Give each player a card. ${p.free ? 'Mark the center FREE space at the start.' : 'There is no FREE space.'}`,
+            'A full row, column or diagonal is a line. Ask the organizer to confirm a win manually. The web caller and checker do not verify these observations or personal conditions.',
+            'Save the project JSON if you need the same layouts again. Print at Actual size / 100%. Use one card per sheet for generous handwriting room.',
+          ]
+        : [
+            `How to play: ${p.title}`,
+            `Project ${p.id}. These instructions belong to this exact set of ${p.cards.length} cards.`,
+            '1. Give every player a card and something to mark it with. Keep the full card ID visible.',
+            '2. Open this project in the web host, or call words from the printed list in a random order. Call each word only once per round.',
+            `3. Players mark matching words. ${p.free ? 'The center FREE space is already marked.' : 'Every space needs a matching called word.'}`,
+            '4. A complete horizontal row, vertical column, or either full diagonal satisfies the Bingo rule. No full-card rule is used.',
+            '5. A player who has a line can call Bingo. Enter their full card ID in the web host to check the marked cells and completed lines.',
+            'Web checks use only the calls recorded in the current web round. A manual paper call is not recorded automatically. Meeting the line rule does not prove who was first, and multiple players can win together.',
+            'Start a new round to clear calls and shuffle a new calling order while keeping the same cards. Save your project JSON to continue on another device.',
+            'Printing: choose the matching paper size, portrait orientation, and Actual size / 100%. Turn off extra scaling. Check one sheet before printing the full batch.',
+          ];
     paragraphs.forEach((text, i) => {
       const size = i === 0 ? 18 : 11;
       const lines = wrapText(text, font, size, pw - margin * 2);
