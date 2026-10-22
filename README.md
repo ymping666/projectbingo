@@ -34,6 +34,8 @@ Both commands explicitly set the deployment target, origin and base path. `INDEX
 
 The existing Cloudflare **projectbingo** static Worker builds `main` with `npm run build` and deploys with `npx wrangler deploy`. `wrangler.jsonc` serves only `dist/`, uses the real 404 page, and does not depend on the last preview build. The GitHub workflow separately tests, builds and publishes **dist-preview/** on pushes to `main`. Preserve the existing Cloudflare domain binding and unrelated DNS records. Host redirects belong in this domain’s Cloudflare Redirect Rules ([official guide](https://developers.cloudflare.com/fundamentals/manage-domains/redirect-domain/)); Workers asset `_redirects` does not support domain-level redirects.
 
+For automatic pushes, the repository owner's **Cloudflare Workers and Pages** GitHub App installation must include `projectbingo` under selected repositories. A repository label in Cloudflare and a successful manual rebuild alone do not verify that access. Keep other repositories' existing authorizations intact. Source updates use ordinary `git push`; the deploy command above runs inside the existing Cloudflare build, so a local Wrangler login is not required.
+
 Formal sitemap: https://bingocardkit.com/sitemap.xml . Submit that URL in the correctly verified Google Search Console and Bing Webmaster Tools properties; no verification tags are fabricated by this project.
 
 ## Activities and migration
