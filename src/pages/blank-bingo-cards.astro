@@ -1,0 +1,48 @@
+---
+import Layout from '../layouts/Layout.astro';
+import BlankCards from '../components/BlankCards';
+import { withBase } from '../lib/url';
+---
+
+<Layout
+  title="Free Printable Blank Bingo Cards"
+  description="Download blank 3 × 3 or 5 × 5 Bingo PDFs on A4 or US Letter, with an optional FREE center. Handwrite your own game without changing your saved activity."
+>
+  <section class="page-intro">
+    <div class="eyebrow">PENCIL, PAPER, PLAY</div><h1>Blank Bingo cards.</h1><p>
+      A clean grid for your own handwriting. Choose your paper, grid and FREE
+      space, then download a real PDF.
+    </p>
+  </section>
+  <BlankCards client:load />
+  <article class="article">
+    <section>
+      <h2>Write a game together</h2><p>
+        Agree on a shared list first. Have each player write different entries
+        from that list in the empty spaces, in any order, without repeating an
+        entry on the same card. Use eight entries for 3 × 3 with FREE, or nine
+        without it; use 24 or 25 for 5 × 5. Larger shared pools give players
+        different selections.
+      </p>
+    </section><section>
+      <h2>Print and play by hand</h2><p>
+        Match the printer paper to A4 or US Letter. Print one test at Actual
+        size / 100%, then make copies. Call entries from your agreed list and
+        keep a paper record. Mark FREE at the start if enabled. Check claimed
+        rows, columns or diagonals against your written record.
+      </p><p>
+        Handwritten contents are not stored in a digital project. These sheets
+        cannot be automatically hosted or verified by the web checker. Visiting
+        this page, changing options and downloading leave your existing project
+        intact.
+      </p>
+    </section><section>
+      <h2>Want the site to call and check your cards?</h2><p>
+        <a href={withBase('/')}>Create a text activity in the card maker</a> and
+        print its generated cards instead. For classroom planning, see the <a
+          href={withBase('/classroom-bingo/')}>teacher guide</a
+        >.
+      </p>
+    </section>
+  </article></Layout
+>

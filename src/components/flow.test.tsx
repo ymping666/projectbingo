@@ -219,7 +219,7 @@ it('counts first actual call once across undo-to-zero, refresh and the independe
     }),
   );
   await screen.findByText('Project imported. Your cards and round are ready.');
-  expect(stored().id).toBe(legacy.id);
+  await waitFor(() => expect(stored().id).toBe(legacy.id));
   expect(stored().cards).toEqual(legacy.cards);
   expect(stored().print).toEqual(legacy.print);
   expect(stored().round.order).toEqual(legacy.round.order);
@@ -249,4 +249,52 @@ it('counts first actual call once across undo-to-zero, refresh and the independe
       .mocked(track)
       .mock.calls.filter((c) => c[0] === 'project_import_success'),
   ).toHaveLength(2);
+});
+import BlankCards from './BlankCards';
+it('keeps existing saved activity byte-for-byte through blank options and download', async () => {
+  const user = userEvent.setup();
+  const original = JSON.stringify(initial());
+  localStorage.setItem(STORAGE_KEY, original);
+  render(<BlankCards />);
+  await user.selectOptions(screen.getByLabelText('Grid size'), '5');
+  await user.selectOptions(screen.getByLabelText('Paper size'), 'Letter');
+  await user.click(screen.getByLabelText('Center FREE space'));
+  await user.click(screen.getByRole('button', { name: 'Download blank PDF' }));
+  await screen.findByText(/Blank PDF ready/);
+  expect(localStorage.getItem(STORAGE_KEY)).toBe(original);
+  expect(blobs).toHaveLength(1);
+  const doc = await PDFDocument.load(await blobBytes(blobs[0]));
+  expect(doc.getPage(0).getWidth()).toBe(612);
+  expect(track).toHaveBeenCalledWith(
+    'export_success',
+    expect.objectContaining({ exportType: 'blank' }),
+  );
+  expect(
+    vi
+      .mocked(track)
+      .mock.calls.some(
+        (c) => c[0] === 'generation_success' || c[0] === 'host_start',
+      ),
+  ).toBe(false);
+});
+it('loads lowercase as a draft, switches uppercase without touching printed cards, and protects replacement', async () => {
+  const user = userEvent.setup();
+  const original = initial();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(original));
+  history.replaceState(null, '', '/?template=alphabet-bingo&preset=lowercase');
+  render(<Editor initial={initial()} />);
+  await waitFor(() =>
+    expect(
+      (screen.getByLabelText('Your words') as HTMLTextAreaElement).value,
+    ).toBe(Array.from('abcdefghijklmnopqrstuvwxyz').join('\n')),
+  );
+  await user.click(screen.getByRole('button', { name: 'Uppercase A–Z' }));
+  expect(
+    (screen.getByLabelText('Your words') as HTMLTextAreaElement).value,
+  ).toBe(Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').join('\n'));
+  expect(stored().cards).toEqual(original.cards);
+  vi.mocked(window.confirm).mockReturnValue(false);
+  await user.click(screen.getByRole('button', { name: /Generate/ }));
+  expect(window.confirm).toHaveBeenCalled();
+  expect(stored().id).toBe(original.id);
 });

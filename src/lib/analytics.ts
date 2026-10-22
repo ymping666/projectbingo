@@ -2,6 +2,7 @@ import { templates } from './templates';
 import { productionBuild, productionOrigin } from './deployment';
 import type { Project } from './model';
 export type AnalyticsEvent =
+  | 'sample_download'
   | 'template_used'
   | 'generation_success'
   | 'export_success'
@@ -19,6 +20,7 @@ export type EventInput = {
 };
 export type SafePayload = Record<string, string | number | boolean>;
 const events = new Set<AnalyticsEvent>([
+  'sample_download',
   'template_used',
   'generation_success',
   'export_success',
@@ -37,6 +39,8 @@ const errors = new Set([
 const routes = new Set([
   '/',
   '/templates/',
+  '/blank-bingo-cards/',
+  '/classroom-bingo/',
   '/about/',
   '/privacy/',
   '/how-to-play/',
@@ -63,7 +67,11 @@ export function safeParameters(input: EventInput = {}): SafePayload {
     result.paper = input.paper;
   if (input.perPage === 1 || input.perPage === 2 || input.perPage === 4)
     result.cards_per_page = input.perPage;
-  if (['cards', 'game_pack', 'sample'].includes(input.exportType as string))
+  if (
+    ['cards', 'game_pack', 'sample', 'blank'].includes(
+      input.exportType as string,
+    )
+  )
     result.export_type = input.exportType as string;
   if (typeof input.errorCode === 'string' && errors.has(input.errorCode))
     result.error_code = input.errorCode;

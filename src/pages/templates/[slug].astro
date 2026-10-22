@@ -93,6 +93,7 @@ const recommendations = (related[t.id] || []).map(
             class="button secondary"
             href={withBase(`/samples/${sampleFilename(t.id)}`)}
             download
+            data-sample-download={t.id}
           >
             Download sample PDF
           </a>
@@ -104,6 +105,80 @@ const recommendations = (related[t.id] || []).map(
           </p>
         </section>
       </article>
+    )
+  }
+  {
+    t.id === 'sight-word-bingo' && (
+      <section class="article">
+        <>
+          <h2>Word list source</h2>
+          <p>
+            The list below matches the complete 40-word Dolch Pre-K group
+            published by{' '}
+            <a href="https://sightwords.com/sight-words/dolch/" rel="external">
+              Sightwords.com
+            </a>{' '}
+            and its{' '}
+            <a
+              href="https://sightwords.com/pdfs/word_lists/dolch_prek.pdf"
+              rel="external"
+            >
+              Pre-K list PDF
+            </a>
+            , checked October 22, 2026. No extra words have been added. Editing
+            it creates your own selection; the maker validates the remaining
+            distinct entries.
+          </p>
+        </>
+      </section>
+    )
+  }
+  {
+    t.variants && (
+      <section class="article">
+        <p>
+          Both presets contain 26 separate letters. Each button loads only that
+          case into the maker as edits, not a newly generated activity.
+        </p>
+        {t.variants.map((v) => {
+          const variantProject = sampleProject(t, v.id);
+          return (
+            <section>
+              <h3>{v.name}</h3>
+              <p>{v.words.join(' · ')}</p>
+              <div class="template-sample">
+                <CardView
+                  project={variantProject}
+                  card={variantProject.cards[0]}
+                />
+              </div>
+              <div class="related-links">
+                <a
+                  class="button secondary"
+                  href={withBase(`/?template=${t.id}&preset=${v.id}`)}
+                  data-template-use={t.id}
+                  data-template-size={t.size}
+                >
+                  Use {v.name}
+                </a>
+                <a
+                  href={withBase(
+                    `/samples/${sampleFilename(`${t.id}-${v.id}`)}`,
+                  )}
+                  download
+                  data-sample-download={t.id}
+                >
+                  Download {v.name} sample PDF
+                </a>
+              </div>
+              <p>
+                Fixed sample only. Generate your own activity before using the
+                web host or checker.
+              </p>
+            </section>
+          );
+        })}
+      </section>
     )
   }
   <section class="word-pool">
@@ -120,6 +195,9 @@ const recommendations = (related[t.id] || []).map(
       the most room; two is a useful everyday choice. Check your PDF before
       printing and use Actual size (100%). Long phrases may need fewer cards per
       page.
+    </p><p>
+      <a href={withBase('/classroom-bingo/')}>Plan a classroom game</a> · <a
+        href={withBase('/blank-bingo-cards/')}>Print handwriting grids</a>
     </p><h2>Keep exploring</h2><div class="related-links">
       {
         recommendations.map((other) => (

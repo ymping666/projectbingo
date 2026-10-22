@@ -7,6 +7,7 @@ export type Template = {
   description: string;
   tip: string;
   words: string[];
+  variants?: { id: string; name: string; words: string[] }[];
 };
 const list = (s: string) => s.split('|');
 export const templates: Template[] = [
@@ -140,12 +141,73 @@ export const templates: Template[] = [
       'Red|Orange|Yellow|Green|Blue|Purple|Pink|Brown|Black|White|Gray|Gold|Silver|Turquoise|Navy|Beige',
     ),
   },
+  {
+    id: 'sight-word-bingo',
+    name: 'Sight Word',
+    icon: 'Aa',
+    size: 3,
+    category: 'Classroom vocabulary',
+    description:
+      'Practice the complete 40-word Dolch Pre-K list with printable text Bingo cards, a caller list, and your own editable activity.',
+    tip: 'Call the displayed word first, then use it in a short sentence. Start with 3 × 3 for fewer spaces to scan; 5 × 5 works with all 40 words.',
+    words: list(
+      'a|and|away|big|blue|can|come|down|find|for|funny|go|help|here|I|in|is|it|jump|little|look|make|me|my|not|one|play|red|run|said|see|the|three|to|two|up|we|where|yellow|you',
+    ),
+  },
+  {
+    id: 'alphabet-bingo',
+    name: 'Alphabet',
+    icon: 'Ab',
+    size: 3,
+    category: 'Letters and numbers',
+    description:
+      'Choose separate A–Z uppercase or a–z lowercase letter presets. Print 3 × 3 or 5 × 5 alphabet recognition cards and call letter names.',
+    tip: 'Say the letter name, pause, and show the same printed letter if learners need a visual cue. This is letter recognition, with no recorded audio or automatic pronunciation.',
+    words: Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
+    variants: [
+      {
+        id: 'uppercase',
+        name: 'Uppercase A–Z',
+        words: Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
+      },
+      {
+        id: 'lowercase',
+        name: 'Lowercase a–z',
+        words: Array.from('abcdefghijklmnopqrstuvwxyz'),
+      },
+    ],
+  },
+  {
+    id: 'numbers-1-20-bingo',
+    name: 'Numbers 1–20',
+    icon: '20',
+    size: 3,
+    category: 'Letters and numbers',
+    description:
+      'A 3 × 3 number recognition game using exactly the numbers 1 through 20. Customize and print a distinct card for each learner.',
+    tip: 'Read the displayed number aloud: for 14, say “fourteen”. Players find its numeral. This is a number recognition activity, not 75-ball or 90-ball Bingo.',
+    words: Array.from({ length: 20 }, (_, i) => String(i + 1)),
+  },
+  {
+    id: 'thanksgiving-bingo',
+    name: 'Thanksgiving Word',
+    icon: '♧',
+    size: 5,
+    category: 'Celebrations',
+    description:
+      'Printable Thanksgiving word cards with 32 food, gathering, and autumn terms for a classroom or family table. Text cards, ready to customize.',
+    tip: 'Review unfamiliar food and gathering words together. Call the exact displayed word or phrase; players mark text, rather than pictures or real objects.',
+    words: list(
+      'Thanksgiving|Gratitude|Thankful|Family|Friends|Gathering|Guest|Welcome|Table|Tablecloth|Napkin|Plate|Bowl|Fork|Spoon|Turkey|Stuffing|Gravy|Mashed potatoes|Sweet potato|Cranberry|Corn|Green beans|Bread roll|Pumpkin|Pumpkin pie|Apple pie|Harvest|Autumn|Leaf|Acorn|Basket',
+    ),
+  },
 ];
 export const food = templates[0];
-export function templateDraft(t: Template) {
+export function templateDraft(t: Template, variant?: string) {
+  const preset = t.variants?.find((v) => v.id === variant) || t.variants?.[0];
   return {
-    title: `${t.name} Bingo`,
-    text: t.words.join('\n'),
+    title: `${t.name} Bingo${preset ? ` — ${preset.name}` : ''}`,
+    text: (preset?.words || t.words).join('\n'),
     size: t.size,
     free: true,
     count: 40,

@@ -118,10 +118,14 @@ const pages = {
         'Your browser requests the static site files, JavaScript, and locally hosted font from the site’s hosting provider. Hosting infrastructure may process ordinary request metadata such as an IP address and user agent. Your Bingo content is not included in those requests.',
       ],
       [
-        'Advertising and statistics',
+        'Google Analytics (GA4) and advertising',
         analyticsConfigured
           ? 'Advertising is off. Optional Google Analytics helps us count template use, successful generations, PDF downloads started, fixed export error categories, the first call in a round, and successful imports. It receives only public template IDs and settings such as grid size and paper layout, plus a page address without query or fragment. It never receives your words, title, card IDs, project files or raw errors. Google may process connection metadata such as your IP address. No Google script is requested until you choose Allow statistics. Choose No thanks or reopen Statistics preferences in the footer to withdraw consent; the activity works either way. Withdrawing removes this site’s analytics cookies. Fonts are hosted on this site.'
-          : 'Advertising and usage statistics are off. No advertising or analytics script is loaded, and fonts are hosted on this site. Your activity works without third-party tracking cookies.',
+          : 'Advertising and Google Analytics (GA4) are not enabled in this build. No Google analytics script is requested by the application. This does not disable hosting-provider statistics described below. Fonts are hosted on this site.',
+      ],
+      [
+        'Cloudflare hosting and performance statistics',
+        'Cloudflare serves the production site and processes request metadata for delivery, security and traffic statistics. Separately, its hosting platform can inject the Web Analytics performance beacon from static.cloudflareinsights.com/beacon.min.js. This may report page views, page addresses, referrers and browser performance measurements to /cdn-cgi/rum on this site or cloudflareinsights.com. Cloudflare states that its RUM beacon does not use cookies or browser storage and does not track people across sites. It does not read your Bingo word list, title, project JSON or calling state. This platform feature is separate from our optional GA4 consent controls. Loading or reporting can depend on platform settings, region, browser blocking and Content Security Policy; a script tag alone is not proof that a report was received. We do not claim that all hosting statistics are disabled when GA4 is off.',
       ],
       [
         'Remove local data',
@@ -153,6 +157,20 @@ const content = pages[Astro.params.page as keyof typeof pages];
           </>
         </section>
       ))
+    }{
+      Astro.params.page === 'privacy' && (
+        <p>
+          Details:{' '}
+          <a href="https://developers.cloudflare.com/speed/observatory/rum-beacon/">
+            Cloudflare RUM privacy and measurements
+          </a>{' '}
+          and{' '}
+          <a href="https://developers.cloudflare.com/web-analytics/data-metrics/data-origin-and-collection/">
+            beacon data flow
+          </a>
+          .
+        </p>
+      )
     }<a href={withBase('/')} class="button primary"
       >Make your Bingo cards <span>↗</span></a
     >

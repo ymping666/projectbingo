@@ -1,0 +1,146 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { withBase } from '../lib/url';
+import { templates } from '../lib/templates';
+import { sampleProject, sampleFilename } from '../lib/samples';
+import { CardView } from '../components/shared';
+const t = templates.find((t) => t.id === 'sight-word-bingo')!;
+const p = sampleProject(t);
+---
+
+<Layout
+  title="Classroom Bingo: Choose, Print and Host an Activity"
+  description="A practical teacher guide to letter, number and vocabulary Bingo: choose grids, print different cards for a class, save the project, and check the same activity."
+>
+  <section class="page-intro">
+    <div class="eyebrow">FOR TEACHERS</div><h1>
+      A classroom game,<br /><em>ready for your group.</em>
+    </h1><p>
+      Start with the skill you want learners to practice, then prepare one
+      consistent set of cards and calls.
+    </p>
+  </section>
+  <section class="template-detail">
+    <article class="article">
+      <h2>Choose the learning task</h2><p>
+        For letter identification, use <a
+          href={withBase('/templates/alphabet-bingo/')}>Alphabet Bingo</a
+        > and choose uppercase or lowercase for that round. Call the letter name;
+        the two cases are independent presets.
+      </p><p>
+        For numeral recognition, <a
+          href={withBase('/templates/numbers-1-20-bingo/')}>Numbers 1–20</a
+        > pairs spoken names with printed numerals on a 3 × 3 grid. It is not an
+        arithmetic or numbered-ball game.
+      </p><p>
+        For familiar word review, try <a
+          href={withBase('/templates/sight-word-bingo/')}>Sight Word Bingo</a
+        >, <a href={withBase('/templates/classroom-objects-bingo/')}
+          >Classroom Objects</a
+        > or <a href={withBase('/templates/food-vocabulary-bingo/')}
+          >Food Vocabulary</a
+        >. Teach or review unfamiliar words before playing. Read the displayed
+        word first; add a short sentence or real-object cue afterward.
+      </p>
+    </article><div class="template-sample">
+      <CardView project={p} card={p.cards[0]} /><p>
+        Fixed Sight Word sample: 3 × 3, FREE center.
+      </p><a
+        href={withBase(`/samples/${sampleFilename(t.id)}`)}
+        data-sample-download={t.id}
+        download>Download example game pack ↗</a
+      ><p>
+        This example is separate from your browser activity. Generate your own
+        set before web hosting.
+      </p>
+    </div>
+  </section>
+  <article class="article">
+    <section>
+      <h2>Choose a grid that fits the lesson</h2><p>
+        3 × 3 has eight called entries with FREE or nine without it. It gives
+        learners fewer spaces to scan and usually makes a shorter round. 5 × 5
+        has 24 or 25 entries, allowing a broader review and a longer search. It
+        needs that many distinct entries in your actual edited list. The
+        20-number preset cannot fill 5 × 5; duplicate entries do not solve a
+        shortage.
+      </p>
+    </section>
+    <section>
+      <h2>Prepare different cards for the whole class</h2><ol>
+        <li>
+          Open a template, review the list, and set Number of cards to your
+          learner count, from 1 to 200. The template loads as edits; it does not
+          replace the saved activity immediately.
+        </li><li>
+          Choose the grid and FREE setting. Generate once and confirm the
+          replacement only when ready. Each generated card has a distinct layout
+          and a full card ID; simultaneous winners are still possible.
+        </li><li>
+          Download the game pack and save its project JSON. For 30 learners at
+          two per sheet, the PDF has 15 player sheets plus caller and rules
+          pages. Keep the ID on every cut card readable.
+        </li>
+      </ol>
+    </section>
+    <section>
+      <h2>Match paper and space</h2><p>
+        Use A4 or US Letter to match the paper in your printer. One card per
+        page gives the most room for large print and handwriting; two is a
+        useful classroom balance; four saves paper, especially for 3 × 3. Long
+        phrases in 5 × 5 may need fewer per page. Print a test sheet at Actual
+        size / 100% and check it from a learner’s seat. See the <a
+          href={withBase('/printing-guide/')}>printing guide</a
+        >.
+      </p>
+    </section>
+    <section>
+      <h2>Host and check the same activity</h2><p>
+        Choose Start hosting in the maker after generating. Call the displayed
+        entry and move through the saved calling order. Undo reverses one call;
+        advancing restores it. When a learner claims a row, column or diagonal,
+        enter the full printed card ID to check it against the calls. FREE
+        starts marked. The checker verifies a line, not who finished first.
+      </p><p>
+        Save JSON after calling if you need to continue on another device.
+        Import that JSON there, confirming replacement of its current activity.
+        The file contains the actual cards and calling progress; the PDF alone
+        cannot restore the project. Refresh normally restores the latest local
+        activity when storage is available.
+      </p>
+    </section>
+    <section>
+      <h2>After printing, keep the card set</h2><p>
+        Do not generate again just to open the host or change paper. Generation
+        makes a new project with new IDs and resets calls; edited drafts are not
+        the printed cards. Save the old JSON before any replacement. If edits
+        are pending at download time, choose Download current card set to retain
+        the existing cards. Choose Generate new set &amp; download only when you
+        intend to print a new activity.
+      </p><p>
+        For another round with the same cards, use Start a new round in the
+        host. It clears calls and reshuffles the order while retaining the card
+        set. For a screen-free activity, use the printed caller list and keep a
+        paper call record; paper calls do not update the web checker.
+      </p>
+    </section>
+    <section>
+      <h2>Other ways to prepare</h2><p>
+        <a href={withBase('/blank-bingo-cards/')}>Blank handwriting grids</a> let
+        learners fill cards by hand, with manual calling and checking only. For seasonal
+        word review, explore <a
+          href={withBase('/templates/thanksgiving-bingo/')}
+          >Thanksgiving Word Bingo</a
+        > or <a href={withBase('/templates/christmas-bingo/')}
+          >Christmas Words</a
+        >. <a href={withBase('/templates/')}
+          >Browse all {templates.length} templates</a
+        >.
+      </p><a
+        class="button primary"
+        href={withBase('/?template=sight-word-bingo')}
+        data-template-use="sight-word-bingo"
+        data-template-size="3">Prepare a Sight Word activity ↗</a>
+    </section>
+  </article></Layout
+>

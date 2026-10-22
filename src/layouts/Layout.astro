@@ -111,7 +111,9 @@ const path = routePath(Astro.url.pathname);
       <a class="footer-brand" href={withBase('/')}
         >Bingo Card Kit <span>A little prep. A lot of play.</span></a
       ><div>
-        <a href={withBase('/printing-guide/')}>Printing guide</a><a
+        <a href={withBase('/blank-bingo-cards/')}>Blank cards</a><a
+          href={withBase('/classroom-bingo/')}>For teachers</a
+        ><a href={withBase('/printing-guide/')}>Printing guide</a><a
           href={withBase('/about/')}>About</a
         ><a href={withBase('/privacy/')}>Privacy</a>{
           config.contactEmail && (
@@ -128,6 +130,15 @@ const path = routePath(Astro.url.pathname);
           event.target instanceof Element
             ? event.target.closest<HTMLAnchorElement>('a[data-template-use]')
             : null;
+        const sample =
+          event.target instanceof Element
+            ? event.target.closest<HTMLAnchorElement>('a[data-sample-download]')
+            : null;
+        if (sample)
+          track('sample_download', {
+            templateId: sample.dataset.sampleDownload,
+            exportType: 'sample',
+          });
         if (link)
           track('template_used', {
             templateId: link.dataset.templateUse,

@@ -44,7 +44,14 @@ export default function Editor({ initial }: { initial: Project }) {
     const t = templates.find(
       (t) => t.id === new URLSearchParams(location.search).get('template'),
     );
-    setDraft(t ? templateDraft(t) : draftOf(p));
+    setDraft(
+      t
+        ? templateDraft(
+            t,
+            new URLSearchParams(location.search).get('preset') || undefined,
+          )
+        : draftOf(p),
+    );
     setIndex(0);
   }, [ready]);
   const imported = (next: Project) => {
@@ -202,6 +209,34 @@ export default function Editor({ initial }: { initial: Project }) {
               </option>
             ))}
           </select>
+          {templates.find((t) => t.id === draft.templateId)?.variants && (
+            <fieldset>
+              <legend>Alphabet preset (edits only)</legend>
+              <div className="segmented">
+                {templates
+                  .find((t) => t.id === draft.templateId)!
+                  .variants!.map((v) => (
+                    <button
+                      key={v.id}
+                      onClick={() =>
+                        setDraft(
+                          templateDraft(
+                            templates.find((t) => t.id === draft.templateId)!,
+                            v.id,
+                          ),
+                        )
+                      }
+                    >
+                      {v.name}
+                    </button>
+                  ))}
+              </div>
+              <p className="field-help">
+                Switching edits the draft. Generate and confirm to replace the
+                saved activity.
+              </p>
+            </fieldset>
+          )}
           <label htmlFor="title">Card title</label>
           <input
             id="title"
@@ -230,6 +265,14 @@ export default function Editor({ initial }: { initial: Project }) {
               ` ${duplicates} duplicate ${duplicates === 1 ? 'entry' : 'entries'} will be removed.`}
           </p>
           {wordError && <Notice error>{wordError}</Notice>}
+          {count < draft.size ** 2 - Number(draft.free) && (
+            <Notice error>
+              This {draft.size} × {draft.size} grid needs{' '}
+              {draft.size ** 2 - Number(draft.free)} distinct entries; you have{' '}
+              {count} after removing duplicates. Choose a smaller grid or add
+              entries. Your selected grid has not changed.
+            </Notice>
+          )}
           <div className="form-row">
             <fieldset>
               <legend>Grid size</legend>

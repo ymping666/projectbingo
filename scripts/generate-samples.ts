@@ -9,3 +9,16 @@ for (const t of templates.filter((t) => featuredIds.includes(t.id))) {
   await writeFile(`public/samples/${sampleFilename(t.id)}`, result.bytes);
   console.log(`${t.name}: two sample cards, caller list and rules`);
 }
+
+const alphabet = templates.find((t) => t.id === 'alphabet-bingo')!;
+for (const variant of alphabet.variants!) {
+  const result = await exportPdf(
+    sampleProject(alphabet, variant.id),
+    true,
+    font,
+  );
+  await writeFile(
+    `public/samples/${sampleFilename(`${alphabet.id}-${variant.id}`)}`,
+    result.bytes,
+  );
+}

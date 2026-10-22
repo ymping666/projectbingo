@@ -77,7 +77,7 @@ assert(!sitemap.includes('github.io'));
 const locations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
   (m) => m[1],
 );
-assert.equal(locations.length, indexable ? 16 : 0);
+assert.equal(locations.length, indexable ? templates.length + 8 : 0);
 for (const url of locations) {
   assert(url.startsWith(origin + '/'));
   await access(path.join(directory, new URL(url).pathname, 'index.html'));

@@ -2012,3 +2012,90 @@ details select {
     margin: auto;
   }
 }
+.blank-workspace {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  padding: 28px 0 48px;
+  align-items: start;
+}
+.blank-options {
+  background: #f2f5ed;
+  padding: 28px;
+  border-radius: 16px;
+}
+.blank-options label {
+  display: block;
+  margin: 18px 0 8px;
+}
+.blank-options select {
+  width: 100%;
+  padding: 12px;
+  background: white;
+  border: 1px solid #ccd3c4;
+  border-radius: 8px;
+}
+.blank-options .check-label {
+  display: flex;
+}
+.blank-sheet {
+  background: white;
+  border: 1px solid #d0d5cb;
+  padding: 7% 6%;
+  text-align: center;
+  box-shadow: 0 8px 24px #2433220d;
+}
+.blank-sheet h2 {
+  margin: 0 0 16px;
+}
+.blank-grid {
+  display: grid;
+  aspect-ratio: 1;
+  border-top: 1px solid #303b30;
+  border-left: 1px solid #303b30;
+  margin: 24px 0;
+}
+.blank-grid > div {
+  border-right: 1px solid #303b30;
+  border-bottom: 1px solid #303b30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.directory-preview {
+  max-width: 260px;
+  margin: 16px auto;
+  pointer-events: none;
+}
+.directory-preview .bingo-card {
+  padding: 12px 6px;
+  box-shadow: none;
+}
+.directory-preview .bingo-card h3 {
+  font-size: 15px;
+}
+.directory-preview .card-footer {
+  font-size: 8px;
+}
+.directory-category {
+  margin: 40px 0 20px;
+}
+.directory-card h3 {
+  font-size: 24px;
+}
+.intro h1 {
+  font-size: clamp(36px, 4.5vw, 66px);
+}
+@media (max-width: 640px) {
+  .blank-workspace {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .blank-options {
+    padding: 20px;
+  }
+  .site-footer > div {
+    flex-wrap: wrap;
+  }
+}
