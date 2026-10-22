@@ -2,11 +2,15 @@
 import { withBase, routePath } from '../lib/url';
 import '../styles/global.css';
 import { config } from '../lib/config';
+import { deployment, productionOrigin } from '../lib/deployment';
+import { analyticsConfigured } from '../lib/analytics';
+import AnalyticsConsent from '../components/AnalyticsConsent';
 const { title, description, noindex = false } = Astro.props;
-const canonical = Astro.site
-  ? new URL(Astro.url.pathname, Astro.site).href
-  : undefined;
-const blocked = noindex || !Astro.site;
+const canonical =
+  deployment.indexable && !noindex
+    ? new URL(Astro.url.pathname, productionOrigin).href
+    : undefined;
+const blocked = noindex || !deployment.indexable;
 const path = routePath(Astro.url.pathname);
 ---
 
@@ -28,7 +32,16 @@ const path = routePath(Astro.url.pathname);
     /><meta property="og:description" content={description} /><meta
       property="og:type"
       content="website"
-    />{canonical && <meta property="og:url" content={canonical} />}<link
+    />{canonical && <meta property="og:url" content={canonical} />}<meta
+      property="og:image"
+      content={new URL(
+        withBase('/social-card.svg'),
+        Astro.site || Astro.url.origin,
+      ).href}
+    /><meta
+      property="og:image:alt"
+      content="Bingo Card Kit — make, print and host word Bingo"
+    /><link
       rel="icon"
       type="image/svg+xml"
       href={withBase('/favicon.svg')}
@@ -64,13 +77,23 @@ const path = routePath(Astro.url.pathname);
       )
     }</head
   ><body
-    ><a class="skip-link" href="#main">Skip to content</a><header
-      class="site-header"
-    >
-      <a href={withBase('/')} class="brand" aria-label="Bingo Print Kit home"
+    data-deployment={deployment.target}
+    data-indexable={String(deployment.indexable)}
+    ><a class="skip-link" href="#main">Skip to content</a>
+    {
+      deployment.target === 'preview' && (
+        <aside class="migration-banner">
+          Our main site is now <a href={productionOrigin}>bingocardkit.com</a>.
+          To move an existing activity, save its project JSON here, then import
+          it on the main site. Your old activities remain available here.
+        </aside>
+      )
+    }
+    <header class="site-header">
+      <a href={withBase('/')} class="brand" aria-label="Bingo Card Kit home"
         ><span class="brand-mark" aria-hidden="true"
           ><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span
-        ><span>Bingo<span class="brand-light"> Print Kit</span></span></a
+        ><span>Bingo<span class="brand-light"> Card Kit</span></span></a
       ><nav aria-label="Main navigation">
         <a class:list={{ active: path === '/' }} href={withBase('/')}
           >Card maker</a
@@ -86,7 +109,7 @@ const path = routePath(Astro.url.pathname);
       </nav>
     </header><main id="main"><slot /></main><footer class="site-footer">
       <a class="footer-brand" href={withBase('/')}
-        >Bingo Print Kit <span>A little prep. A lot of play.</span></a
+        >Bingo Card Kit <span>A little prep. A lot of play.</span></a
       ><div>
         <a href={withBase('/printing-guide/')}>Printing guide</a><a
           href={withBase('/about/')}>About</a
@@ -95,7 +118,22 @@ const path = routePath(Astro.url.pathname);
             <a href={`mailto:${config.contactEmail}`}>Contact</a>
           )
         }
+        {analyticsConfigured && <AnalyticsConsent client:load />}
       </div><p>Made for shared tables, classrooms, and good company.</p>
-    </footer></body
-  >
+    </footer>
+    <script>
+      import { track } from '../lib/analytics';
+      document.addEventListener('click', (event) => {
+        const link =
+          event.target instanceof Element
+            ? event.target.closest<HTMLAnchorElement>('a[data-template-use]')
+            : null;
+        if (link)
+          track('template_used', {
+            templateId: link.dataset.templateUse,
+            size: Number(link.dataset.templateSize),
+          });
+      });
+    </script>
+  </body>
 </html>

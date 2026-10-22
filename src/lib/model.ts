@@ -18,7 +18,7 @@ export type Project = {
   free: boolean;
   cards: Card[];
   print: Print;
-  round: { number: number; order: string[]; cursor: number };
+  round: { number: number; order: string[]; cursor: number; started?: boolean };
 };
 export type Draft = {
   title: string;
@@ -141,6 +141,7 @@ export function generate(
         rng,
       ),
       cursor: 0,
+      started: false,
     },
   };
 }
@@ -168,11 +169,13 @@ export function checkCard(p: Project, id: string) {
   return { card, hits, complete, winning: new Set(complete.flat()) };
 }
 export function advance(p: Project, delta: number): Project {
+  const cursor = Math.max(0, Math.min(p.words.length, p.round.cursor + delta));
   return {
     ...p,
     round: {
       ...p.round,
-      cursor: Math.max(0, Math.min(p.words.length, p.round.cursor + delta)),
+      cursor,
+      started: !!p.round.started || p.round.cursor > 0 || cursor > 0,
     },
   };
 }
@@ -183,6 +186,7 @@ export function newRound(p: Project): Project {
       number: p.round.number + 1,
       order: shuffle(p.words.map((w) => w.id)),
       cursor: 0,
+      started: false,
     },
   };
 }
@@ -201,7 +205,7 @@ export function parseProject(text: string): Project {
   }
   assert(
     p && p.schemaVersion === 1 && p.generatorVersion === '1.0',
-    'Unsupported project version. Use a Bingo Print Kit v1 project.',
+    'Unsupported project version. Use a Bingo Card Kit v1 project.',
   );
   assert(
     typeof p.id === 'string' && /^[A-F0-9]{8}$/.test(p.id),
@@ -316,6 +320,7 @@ export function parseProject(text: string): Project {
       p.round.cursor <= ids.size,
     'Invalid calling order or progress.',
   );
+  assert(p.round.started === undefined || typeof p.round.started === 'boolean', 'Invalid round started flag.');
   // Return only known fields, never persist arbitrary imported properties.
   return {
     schemaVersion: 1,
@@ -344,6 +349,7 @@ export function parseProject(text: string): Project {
       number: p.round.number,
       order: [...p.round.order],
       cursor: p.round.cursor,
+      started: p.round.started === true || p.round.cursor > 0,
     },
   };
 }

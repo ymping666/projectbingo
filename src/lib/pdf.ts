@@ -2,6 +2,7 @@ import { PDFDocument, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import type { Project } from './model';
 import { withBase } from './url';
+import { config } from './config';
 export type ExportResult = {
   bytes: Uint8Array;
   cardPages: number;
@@ -140,7 +141,7 @@ export async function exportPdf(
       );
   }
   doc.setTitle(p.title);
-  doc.setAuthor('Bingo Print Kit');
+  doc.setAuthor(config.name);
   doc.setSubject(`Project ${p.id} • ${p.cards.length} cards`);
   const [pw, ph] = p.print.paper === 'A4' ? [595.28, 841.89] : [612, 792];
   const margin = 36,
@@ -164,7 +165,7 @@ export async function exportPdf(
     if (slot === 0) {
       page = doc.addPage([pw, ph]);
       page.drawText(
-        `Bingo Print Kit  /  ${p.id}  /  Cards ${Math.floor(i / p.print.perPage) + 1} of ${cardPages}`,
+        `${config.name}  /  ${p.id}  /  Cards ${Math.floor(i / p.print.perPage) + 1} of ${cardPages}`,
         { x: margin, y: 19, size: 10, font, color: ink },
       );
     }

@@ -83,7 +83,7 @@ export const templates: Template[] = [
     category: 'Everyday learning',
     description:
       'Thirty-six familiar action words for an active vocabulary game.',
-    tip: 'You can demonstrate an action before saying its word. Use the exact word on the caller list when recording calls in the web host.',
+    tip: 'Choose Next word in the host, demonstrate the displayed action, then say its word aloud. The host records that displayed call automatically.',
     words: list(
       'Walk|Run|Jump|Hop|Skip|Climb|Swim|Dance|Sing|Read|Write|Draw|Paint|Cook|Eat|Drink|Sleep|Wake up|Sit|Stand|Smile|Laugh|Cry|Listen|Speak|Watch|Open|Close|Push|Pull|Carry|Throw|Catch|Kick|Wash|Clean',
     ),

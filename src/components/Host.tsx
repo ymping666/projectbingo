@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { advance, newRound, checkCard, type Project } from '../lib/model';
 import { useProject, ProjectTools, CardView, Notice } from './shared';
+import { trackHostStart } from '../lib/analytics';
 export default function Host() {
   const { project: p, setProject, ready, save } = useProject();
   const [message, setMessage] = useState('');
@@ -96,7 +97,16 @@ export function HostSession({
             <button
               className="button primary"
               disabled={p.round.cursor === p.words.length}
-              onClick={() => setProject(advance(p, 1))}
+              onClick={() => {
+                const next = advance(p, 1);
+                if (
+                  !p.round.started &&
+                  p.round.cursor === 0 &&
+                  next.round.cursor > 0
+                )
+                  trackHostStart(next);
+                setProject(next);
+              }}
             >
               {p.round.cursor === p.words.length
                 ? 'All words called'
@@ -123,7 +133,12 @@ export function HostSession({
         <section className="verify-panel">
           <div className="section-eyebrow">SOMEONE CALLED BINGO?</div>
           <h2>Check their card.</h2>
-          <p>A full row, column, or diagonal counts. FREE is already marked.</p>
+          <p>
+            A full row, column, or diagonal counts.{' '}
+            {p.free
+              ? 'FREE is already marked.'
+              : 'Every cell needs a called word.'}
+          </p>
           <form
             onSubmit={(e) => {
               e.preventDefault();

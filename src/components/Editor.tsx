@@ -1,5 +1,5 @@
 import { withBase } from '../lib/url';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   ArrowRight,
   ChevronLeft,
@@ -20,7 +20,7 @@ import {
   type Print,
 } from '../lib/model';
 import { templates, templateDraft } from '../lib/templates';
-import { track } from '../lib/config';
+import { track, projectParameters, exportErrorCode } from '../lib/analytics';
 import { CardView, ProjectTools, Notice, useProject, download } from './shared';
 import { HostSession } from './Host';
 export default function Editor({ initial }: { initial: Project }) {
@@ -32,7 +32,13 @@ export default function Editor({ initial }: { initial: Project }) {
     [error, setError] = useState(''),
     [busy, setBusy] = useState(''),
     [progress, setProgress] = useState(0),
-    [hosting, setHosting] = useState(false);
+    [hosting, setHosting] = useState(false),
+    [downloadChoice, setDownloadChoice] = useState<boolean | null>(null);
+  const operation = useRef(false),
+    choiceButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (downloadChoice !== null) choiceButton.current?.focus();
+  }, [downloadChoice]);
   useEffect(() => {
     if (!ready) return;
     const t = templates.find(
@@ -46,10 +52,6 @@ export default function Editor({ initial }: { initial: Project }) {
     setDraft(draftOf(next));
     setIndex(0);
     setError('');
-    track('project_import_success', {
-      size: next.size,
-      count: next.cards.length,
-    });
   };
   let count = 0,
     duplicates = 0,
@@ -66,58 +68,89 @@ export default function Editor({ initial }: { initial: Project }) {
     JSON.stringify({ ...draftOf(p), templateId: undefined });
   const update = <K extends keyof Draft>(k: K, v: Draft[K]) =>
     setDraft((d) => ({ ...d, [k]: v }));
+  const confirmNew = () =>
+    window.confirm(
+      `Create a new activity? This replaces “${p.title}” (${p.id}), creates new card IDs, and resets the calling round. Previously printed cards still belong to the old project. Save its JSON first to keep it.`,
+    );
+  function createDraftSnapshot() {
+    const next = generate(draft, p.print);
+    setProject(next);
+    setDraft(draftOf(next));
+    setIndex(0);
+    track('generation_success', projectParameters(next));
+    return next;
+  }
   async function make() {
+    if (operation.current || !ready) return;
     setError('');
     setMessage('');
     try {
-      if (
-        dirty &&
-        !window.confirm(
-          'Generate a new project? Previously printed cards belong to the old project. Save its JSON first if you need it.',
-        )
-      )
-        return;
+      if ((dirty || p.round.started) && !confirmNew()) return;
+      operation.current = true;
       setBusy('Generating cards');
       await new Promise((r) => setTimeout(r, 20));
-      const next = generate(draft, p.print);
-      setProject(next);
-      setDraft(draftOf(next));
-      setIndex(0);
+      const next = createDraftSnapshot();
       setMessage(
         `Created ${next.cards.length} distinct card layouts. Project ${next.id}.`,
       );
-      track('generation_success', {
-        templateId: draft.templateId,
-        size: next.size,
-        count: next.cards.length,
-      });
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setBusy('');
+      operation.current = false;
     }
   }
-  async function pdf(pack: boolean) {
+  function pdf(pack: boolean) {
+    if (operation.current || !ready) return;
+    if (dirty) {
+      setDownloadChoice(pack);
+      return;
+    }
+    void downloadSet(pack, false);
+  }
+  async function downloadSet(pack: boolean, fresh: boolean) {
+    if (operation.current || !ready) return;
+    if (fresh && !confirmNew()) return;
+    operation.current = true;
+    setDownloadChoice(null);
+    let snapshot = p,
+      stage: 'export' | 'download' = 'export';
     setError('');
     setMessage('');
     setBusy(pack ? 'Making game pack' : 'Making card PDF');
     setProgress(0);
     try {
+      if (fresh) {
+        setBusy('Generating cards');
+        await new Promise((r) => setTimeout(r, 20));
+        snapshot = createDraftSnapshot();
+        setBusy(pack ? 'Making game pack' : 'Making card PDF');
+      }
       const { exportPdf } = await import('../lib/pdf');
-      const result = await exportPdf(p, pack, undefined, setProgress);
+      const result = await exportPdf(snapshot, pack, undefined, setProgress);
+      stage = 'download';
       download(
         result.bytes as BlobPart,
-        `bingo-${p.id}-${pack ? 'game-pack' : 'cards'}.pdf`,
+        `bingo-card-kit-${snapshot.id}-${pack ? 'game-pack' : 'cards'}.pdf`,
         'application/pdf',
       );
       setMessage(
         `PDF ready: ${result.cardPages} card pages${pack ? ` + ${result.extraPages} caller and rules pages` : ''}. Print at Actual size / 100%.`,
       );
-      track('export_success', { size: p.size, count: p.cards.length });
+      track('export_success', {
+        ...projectParameters(snapshot),
+        exportType: pack ? 'game_pack' : 'cards',
+      });
     } catch (e) {
       setError((e as Error).message);
+      track('export_error', {
+        ...projectParameters(snapshot),
+        exportType: pack ? 'game_pack' : 'cards',
+        errorCode: stage === 'download' ? 'download_error' : exportErrorCode(e),
+      });
     } finally {
       setBusy('');
+      operation.current = false;
     }
   }
   const print = <K extends keyof Print>(key: K, value: Print[K]) =>
@@ -156,8 +189,10 @@ export default function Editor({ initial }: { initial: Project }) {
             value={draft.templateId || ''}
             onChange={(e) => {
               const t = templates.find((t) => t.id === e.target.value);
-              if (t) setDraft(templateDraft(t));
-              else setDraft({ ...draft, templateId: undefined });
+              if (t) {
+                setDraft(templateDraft(t));
+                track('template_used', { templateId: t.id, size: t.size });
+              } else setDraft({ ...draft, templateId: undefined });
             }}
           >
             <option value="">Custom word list</option>
@@ -314,8 +349,27 @@ export default function Editor({ initial }: { initial: Project }) {
           <span className="step-badge purple">2</span>
           <h2>Your cards, ready to go</h2>
           <span className="live-label">
-            <i /> LIVE PREVIEW
+            <i /> {dirty ? 'EDITS NOT GENERATED' : 'GENERATED SET'}
           </span>
+        </div>
+        <div
+          className={`snapshot-banner ${dirty ? 'has-edits' : ''}`}
+          role={dirty ? 'status' : undefined}
+        >
+          <strong>
+            {dirty
+              ? 'Your edits are not in this card set yet.'
+              : 'Current generated activity'}
+          </strong>
+          <span>
+            {p.title} · {p.size} × {p.size} · {p.cards.length} cards
+          </span>
+          {dirty && (
+            <p>
+              The preview and existing downloads belong to this saved set.
+              Generate a new set to apply your edited words or template.
+            </p>
+          )}
         </div>
         <div className="preview-stage">
           <div className="preview-topline">
@@ -372,6 +426,12 @@ export default function Editor({ initial }: { initial: Project }) {
           </div>
         </div>
         <div className="export-area">
+          {dirty && (
+            <p className="draft-export-hint">
+              You have ungenerated edits. Download will let you choose this
+              saved set or generate your changes first.
+            </p>
+          )}
           <div className="export-heading">
             <div>
               <h3>Let’s get playing.</h3>
@@ -382,6 +442,41 @@ export default function Editor({ initial }: { initial: Project }) {
             </div>
             <span className="pdf-badge">PDF</span>
           </div>
+          {downloadChoice !== null && (
+            <section
+              className="download-choice"
+              role="dialog"
+              aria-labelledby="download-choice-title"
+            >
+              <h3 id="download-choice-title">Which card set would you like?</h3>
+              <p>
+                Current set: <strong>{p.title}</strong> · {p.size} × {p.size} ·{' '}
+                {p.cards.length} cards. Your form contains changes that have not
+                been generated.
+              </p>
+              <button
+                ref={choiceButton}
+                className="button outline"
+                disabled={!!busy}
+                onClick={() => void downloadSet(downloadChoice!, false)}
+              >
+                Download current card set
+              </button>
+              <button
+                className="button primary"
+                disabled={!!busy}
+                onClick={() => void downloadSet(downloadChoice!, true)}
+              >
+                Generate new set &amp; download
+              </button>
+              <button
+                className="text-button"
+                onClick={() => setDownloadChoice(null)}
+              >
+                Cancel
+              </button>
+            </section>
+          )}
           <button
             className="button dark"
             disabled={!!busy || !ready}
@@ -405,7 +500,6 @@ export default function Editor({ initial }: { initial: Project }) {
               onClick={(e) => {
                 e.preventDefault();
                 setHosting(true);
-                track('host_start', { size: p.size, count: p.cards.length });
               }}
             >
               Start hosting <ExternalLink size={14} />

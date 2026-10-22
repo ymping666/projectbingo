@@ -1,6 +1,7 @@
 ---
 import { withBase } from '../lib/url';
 import Layout from '../layouts/Layout.astro';
+import { analyticsConfigured } from '../lib/analytics';
 const pages = {
   'how-to-play': {
     title: 'How to play word Bingo',
@@ -72,7 +73,7 @@ const pages = {
   },
   about: {
     title: 'A little prep. A lot of play.',
-    intro: 'Bingo Print Kit turns your own words into a shared activity.',
+    intro: 'Bingo Card Kit turns your own words into a shared activity.',
     sections: [
       [
         'Built for the gathering',
@@ -87,12 +88,12 @@ const pages = {
         'This edition supports custom text in 3 × 3 or 5 × 5 grids. It does not include image cards, AI generation, multiplayer rooms, voice, music, or standard 75-ball and 90-ball number games.',
       ],
       [
-        'Honest about the details',
-        'Different layouts do not guarantee only one winner. The host checks the recorded calls against a card; it does not determine who was first. We do not claim teacher certification or paper testing we have not performed.',
+        'Share the game',
+        'Make your word list, generate one card per player, and download a PDF game pack with a caller list and rules. Open Start hosting to call words and check the same printed cards. Different layouts can still produce simultaneous winners, so agree on your winning rule before you begin.',
       ],
       [
         'Keep a copy',
-        'Your latest activity is stored in this browser where storage is available. A downloaded project JSON is the portable backup. The temporary product name and any future contact address are maintained in one site configuration file. No contact form is offered until a real contact route is available.',
+        'Your latest activity is saved in this browser when storage is available. Save project JSON to back up the cards and calling progress. Import that file to continue on another device or move an activity from our GitHub preview to bingocardkit.com. Each site has its own browser storage.',
       ],
     ],
   },
@@ -118,7 +119,9 @@ const pages = {
       ],
       [
         'Advertising and statistics',
-        'Advertising and analytics are disabled in this release. No advertising SDK, tracking script, or third-party font CDN is loaded. If these services are enabled later, this notice must be updated before those scripts are used. Future statistics must exclude titles, words, card content, and project files.',
+        analyticsConfigured
+          ? 'Advertising is off. Optional Google Analytics helps us count template use, successful generations, PDF downloads started, fixed export error categories, the first call in a round, and successful imports. It receives only public template IDs and settings such as grid size and paper layout, plus a page address without query or fragment. It never receives your words, title, card IDs, project files or raw errors. Google may process connection metadata such as your IP address. No Google script is requested until you choose Allow statistics. Choose No thanks or reopen Statistics preferences in the footer to withdraw consent; the activity works either way. Withdrawing removes this site’s analytics cookies. Fonts are hosted on this site.'
+          : 'Advertising and usage statistics are off. No advertising or analytics script is loaded, and fonts are hosted on this site. Your activity works without third-party tracking cookies.',
       ],
       [
         'Remove local data',
@@ -137,7 +140,7 @@ const content = pages[Astro.params.page as keyof typeof pages];
 
 <Layout title={content.title} description={content.intro}
   ><section class="page-intro">
-    <div class="eyebrow">BINGO PRINT KIT</div><h1>{content.title}</h1><p>
+    <div class="eyebrow">BINGO CARD KIT</div><h1>{content.title}</h1><p>
       {content.intro}
     </p>
   </section><article class="article">

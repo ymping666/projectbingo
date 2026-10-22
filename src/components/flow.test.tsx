@@ -7,6 +7,13 @@ import { PDFDocument } from 'pdf-lib';
 import Editor from './Editor';
 import { generate, STORAGE_KEY, type Project } from '../lib/model';
 import { food, templateDraft } from '../lib/templates';
+import { track, trackHostStart } from '../lib/analytics';
+import Host from './Host';
+vi.mock('../lib/analytics', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../lib/analytics')>()),
+  track: vi.fn(),
+  trackHostStart: vi.fn(),
+}));
 const font = readFileSync('public/fonts/Lato-Regular.ttf');
 let blobs: Blob[] = [];
 const blobText = (b: Blob) =>
@@ -36,6 +43,8 @@ beforeEach(() => {
   localStorage.clear();
   history.replaceState(null, '', '/');
   blobs = [];
+  vi.mocked(track).mockClear();
+  vi.mocked(trackHostStart).mockClear();
   vi.spyOn(window, 'confirm').mockReturnValue(true);
   URL.createObjectURL = vi.fn((b: Blob) => {
     blobs.push(b);
@@ -154,4 +163,90 @@ it('does not replace a corrupt saved project with the default example', async ()
   render(<Editor initial={initial()} />);
   await screen.findByText(/Local restore unavailable/);
   expect(localStorage.getItem(STORAGE_KEY)).toBe('corrupt');
+});
+it('offers both dirty download branches and exports the exact new snapshot, with repeated-click protection', async () => {
+  const user = userEvent.setup(),
+    old = initial();
+  render(<Editor initial={old} />);
+  await screen.findByText('Saved on this browser');
+  expect(track).not.toHaveBeenCalled();
+  await user.selectOptions(
+    screen.getByLabelText(/Start with a template/),
+    'weather-bingo',
+  );
+  expect(screen.getByText('EDITS NOT GENERATED')).toBeTruthy();
+  await user.click(screen.getByRole('button', { name: 'Download cards only' }));
+  expect(screen.getByRole('dialog')).toBeTruthy();
+  await user.click(
+    screen.getByRole('button', { name: 'Download current card set' }),
+  );
+  await screen.findByText(/PDF ready:/, {}, { timeout: 15000 });
+  expect(stored().id).toBe(old.id);
+  expect(
+    (await PDFDocument.load(await blobBytes(blobs.at(-1)!))).getTitle(),
+  ).toBe(old.title);
+  await user.click(screen.getByRole('button', { name: 'Download cards only' }));
+  await user.dblClick(
+    screen.getByRole('button', { name: 'Generate new set & download' }),
+  );
+  await waitFor(() => expect(blobs).toHaveLength(2), { timeout: 15000 });
+  const next = stored();
+  expect(next.id).not.toBe(old.id);
+  expect(next.size).toBe(3);
+  expect(next.round.cursor).toBe(0);
+  const pdf = await PDFDocument.load(await blobBytes(blobs.at(-1)!));
+  expect(pdf.getTitle()).toBe(next.title);
+  expect(screen.getByText(next.cards[0].id)).toBeTruthy();
+  expect(
+    vi.mocked(track).mock.calls.filter((c) => c[0] === 'generation_success'),
+  ).toHaveLength(1);
+  expect(
+    vi.mocked(track).mock.calls.filter((c) => c[0] === 'export_success'),
+  ).toHaveLength(2);
+}, 30000);
+it('counts first actual call once across undo-to-zero, refresh and the independent host; imports old JSON without changing cards', async () => {
+  const user = userEvent.setup();
+  const legacy = JSON.parse(
+    readFileSync('src/lib/fixtures/legacy-project-v1.json', 'utf8'),
+  ) as Project;
+  delete legacy.round.started;
+  const view = render(<Editor initial={initial()} />);
+  await screen.findByText('Saved on this browser');
+  await user.upload(
+    screen.getByLabelText('Import project JSON'),
+    new File([JSON.stringify(legacy)], 'old-project.json', {
+      type: 'application/json',
+    }),
+  );
+  await screen.findByText('Project imported. Your cards and round are ready.');
+  expect(stored().id).toBe(legacy.id);
+  expect(stored().cards).toEqual(legacy.cards);
+  expect(stored().print).toEqual(legacy.print);
+  expect(stored().round.order).toEqual(legacy.round.order);
+  expect(stored().round.cursor).toBe(legacy.round.cursor);
+  await user.click(screen.getByRole('link', { name: /Start hosting/ }));
+  expect(trackHostStart).not.toHaveBeenCalled();
+  await user.click(screen.getByRole('button', { name: /Start a new round/ }));
+  await user.click(screen.getByRole('button', { name: /Call first word/ }));
+  expect(trackHostStart).toHaveBeenCalledTimes(1);
+  await user.click(screen.getByRole('button', { name: 'Undo' }));
+  expect(stored().round.cursor).toBe(0);
+  expect(stored().round.started).toBe(true);
+  view.unmount();
+  render(<Host />);
+  await screen.findByText('0 of 50 words called');
+  await user.click(screen.getByRole('button', { name: /Call first word/ }));
+  expect(trackHostStart).toHaveBeenCalledTimes(1);
+  await user.upload(
+    screen.getByLabelText('Import project JSON'),
+    new File([JSON.stringify(legacy)], 'old-project.json', {
+      type: 'application/json',
+    }),
+  );
+  await screen.findByText('Project imported. Your cards and round are ready.');
+  expect(
+    vi
+      .mocked(track)
+      .mock.calls.filter((c) => c[0] === 'project_import_success'),
+  ).toHaveLength(2);
 });

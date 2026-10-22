@@ -1,17 +1,19 @@
 ---
 import { withBase } from '../../lib/url';
 import Layout from '../../layouts/Layout.astro';
-import { templates, templateDraft } from '../../lib/templates';
-import { generate } from '../../lib/model';
+import { templates } from '../../lib/templates';
+import { sampleProject, sampleFilename } from '../../lib/samples';
+import { featured, related } from '../../lib/template-content';
 import { CardView } from '../../components/shared';
 import AdSlot from '../../components/AdSlot.astro';
 export function getStaticPaths() {
   return templates.map((t) => ({ params: { slug: t.id }, props: { t } }));
 }
 const { t } = Astro.props;
-const p = generate(
-  { ...templateDraft(t), count: 1 },
-  { paper: 'A4', perPage: 2, theme: 'ink' },
+const p = sampleProject(t);
+const content = featured[t.id];
+const recommendations = (related[t.id] || []).map(
+  (id) => templates.find((other) => other.id === id)!,
 );
 ---
 
@@ -27,8 +29,11 @@ const p = generate(
       >
         <span>{t.words.length} words</span><span>{t.size} × {t.size} grid</span
         ><span>Free to customize</span>
-      </div><a class="button primary" href={withBase(`/?template=${t.id}`)}
-        >Use this template <span>↗</span></a
+      </div><a
+        class="button primary"
+        href={withBase(`/?template=${t.id}`)}
+        data-template-use={t.id}
+        data-template-size={t.size}>Use this template <span>↗</span></a
       ><h2>At your next gathering</h2><p>{t.tip}</p><p>
         Print one distinct card per player. Call words from this list, and mark
         a full row, column, or diagonal. The optional center FREE space starts
@@ -39,7 +44,69 @@ const p = generate(
         One real layout, generated from the word list below.
       </p>
     </div>
-  </section><section class="word-pool">
+  </section>
+  {
+    content && (
+      <article class="article template-notes">
+        <section>
+          <>
+            <h2>A game for your group</h2>
+            <p>{content.scene}</p>
+          </>
+        </section>
+        <section>
+          <>
+            <h2>Suggested settings</h2>
+            <p>{content.settings}</p>
+          </>
+        </section>
+        <section>
+          <>
+            <h2>Prepare and play</h2>
+            <ol>
+              {content.steps.map((step) => (
+                <li>{step}</li>
+              ))}
+            </ol>
+          </>
+        </section>
+        <section>
+          <>
+            <h2>Try these calls and conversations</h2>
+            <ul>
+              {content.examples.map((example) => (
+                <li>{example}</li>
+              ))}
+            </ul>
+          </>
+        </section>
+        <section>
+          <>
+            <h2>Download an example game pack</h2>
+            <p>
+              See two sample cards, the complete caller list and the rules in a
+              real A4 PDF, with two cards per page. The card shown above belongs
+              to this sample.
+            </p>
+          </>
+          <a
+            class="button secondary"
+            href={withBase(`/samples/${sampleFilename(t.id)}`)}
+            download
+          >
+            Download sample PDF
+          </a>
+          <p>
+            This is a fixed example, separate from the activity saved in your
+            browser. To host your own cards with the web checker, use this
+            template, generate a new card set, save its project JSON and start
+            hosting that same activity.
+          </p>
+        </section>
+      </article>
+    )
+  }
+  <section class="word-pool">
     <div class="section-title">
       <div>
         <div class="section-eyebrow">WHAT’S IN THE GAME</div><h2>
@@ -55,12 +122,9 @@ const p = generate(
       page.
     </p><h2>Keep exploring</h2><div class="related-links">
       {
-        templates
-          .filter((other) => other.id !== t.id)
-          .slice(0, 3)
-          .map((other) => (
-            <a href={withBase(`/templates/${other.id}/`)}>{other.name} ↗</a>
-          ))
+        recommendations.map((other) => (
+          <a href={withBase(`/templates/${other.id}/`)}>{other.name} ↗</a>
+        ))
       }
     </div>
   </section><AdSlot /></Layout

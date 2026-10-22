@@ -14,6 +14,11 @@ jobs:
     env:
       ASTRO_TELEMETRY_DISABLED: '1'
       PUBLIC_BASE_PATH: /projectbingo/
+      PUBLIC_SITE_URL: https://ymping666.github.io
+      PUBLIC_DEPLOYMENT: preview
+      INDEXABLE_BUILD: 'false'
+      PUBLIC_GA4_ID: ''
+      PUBLIC_GA4_MANUAL_ONLY: 'false'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,12 +28,12 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm test
-      - run: npm run build
-      - run: npm run qa:html
+      - run: npm run build:preview
+      - run: npm run qa:html:preview
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: dist
+          path: dist-preview
   deploy:
     needs: build
     runs-on: ubuntu-latest

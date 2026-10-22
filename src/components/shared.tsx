@@ -7,6 +7,9 @@ import {
   type Card,
 } from '../lib/model';
 import { Download, Upload, Check, AlertCircle } from 'lucide-react';
+import { config } from '../lib/config';
+import { track, projectParameters } from '../lib/analytics';
+import { longestWordEm, needsWordBreak } from '../lib/card-text';
 export function download(data: BlobPart, name: string, type: string) {
   const url = URL.createObjectURL(new Blob([data], { type }));
   const a = document.createElement('a');
@@ -90,6 +93,7 @@ export function ProjectTools({
       )
         return;
       onImport(next);
+      track('project_import_success', projectParameters(next));
       onMessage('Project imported. Your cards and round are ready.');
     } catch (e) {
       onMessage((e as Error).message);
@@ -104,7 +108,7 @@ export function ProjectTools({
           project &&
           download(
             JSON.stringify(project, null, 2),
-            `bingo-${project.id}.json`,
+            `bingo-card-kit-${project.id}.json`,
             // Force a file download in embedded browsers that preview JSON MIME types.
             'application/octet-stream',
           )
@@ -147,7 +151,13 @@ export function CardView({
       </div>
       <div
         className="bingo-grid"
-        style={{ gridTemplateColumns: `repeat(${project.size},minmax(0,1fr))` }}
+        style={
+          {
+            gridTemplateColumns: `repeat(${project.size},minmax(0,1fr))`,
+            '--grid-size': project.size,
+            '--cell-max-font': project.size === 3 ? '20px' : '14px',
+          } as React.CSSProperties
+        }
       >
         {card.cells.map((c, i) => (
           <div
@@ -160,7 +170,16 @@ export function CardView({
                 <span>FREE</span>
               </>
             ) : (
-              words.get(c.wordId)
+              <span
+                className={`cell-word ${needsWordBreak(words.get(c.wordId)!) ? 'break-long' : ''}`}
+                style={
+                  {
+                    '--word-em': longestWordEm(words.get(c.wordId)!),
+                  } as React.CSSProperties
+                }
+              >
+                {words.get(c.wordId)}
+              </span>
             )}
             {hits?.[i] && c.kind !== 'free' && (
               <span className="hit-check" aria-label="Called">
@@ -171,7 +190,7 @@ export function CardView({
         ))}
       </div>
       <div className="card-footer">
-        <span>Bingo Print Kit</span>
+        <span>{config.name}</span>
         <span>{card.id}</span>
       </div>
     </div>

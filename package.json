@@ -1,5 +1,5 @@
 {
-  "name": "bingo-print-kit",
+  "name": "bingo-card-kit",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -8,12 +8,16 @@
   },
   "scripts": {
     "dev": "astro dev --host 127.0.0.1",
-    "build": "astro build",
+    "build": "node scripts/build.mjs production",
     "preview": "astro preview --host 127.0.0.1",
     "test": "vitest run",
     "check": "tsc --noEmit",
     "qa:pdf": "tsx scripts/verify-pdf.ts",
-    "qa:html": "tsx scripts/verify-html.ts"
+    "qa:html": "tsx scripts/verify-html.ts",
+    "build:production": "node scripts/build.mjs production",
+    "build:preview": "node scripts/build.mjs preview",
+    "qa:html:preview": "tsx scripts/verify-html.ts preview",
+    "samples": "tsx scripts/generate-samples.ts"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.0",
