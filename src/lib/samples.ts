@@ -14,7 +14,7 @@ export function sampleProject(t: Template) {
     ['F00D0001', 'C1A55001', 'DEC25001'][featuredIds.indexOf(t.id)] ||
     'EAA00001';
   const p = generate(
-    { ...templateDraft(t), count: 2 },
+    { ...templateDraft(t), title: `${t.name} Bingo (Sample)`, count: 2 },
     { paper: 'A4', perPage: 2, theme: 'ink' },
     rng,
     id,
