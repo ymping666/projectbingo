@@ -1,0 +1,12 @@
+---
+import { config } from '../lib/config';
+// Add a real, approved provider here only after updating the privacy notice.
+---
+
+{
+  config.ads.enabled && config.ads.publisherId && (
+    <aside aria-label="Advertisement" class="ad-slot">
+      Advertisement
+    </aside>
+  )
+}

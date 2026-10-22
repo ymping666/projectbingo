@@ -1,0 +1,15 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Host from '../components/Host';
+---
+
+<Layout
+  title="Host your Bingo game"
+  description="Call words, undo calls, and check Bingo cards from your saved activity."
+  noindex
+  ><section class="page-intro">
+    <div class="eyebrow">THE WHOLE TABLE, ONE GAME</div><h1>
+      Let the good times <em>roll.</em>
+    </h1><p>Call the words. Keep the rhythm. Check the Bingo.</p>
+  </section><Host client:load /></Layout
+>

@@ -1,0 +1,42 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { templates } from '../../lib/templates';
+import AdSlot from '../../components/AdSlot.astro';
+---
+
+<Layout
+  title="10 free word Bingo templates"
+  description="Browse ten ready-to-use word Bingo templates for learning, parties, and quick games. Read the actual word lists and customize your cards."
+  ><section class="page-intro">
+    <div class="eyebrow">READY, SET, BINGO</div><h1>
+      A theme for <em>your table.</em>
+    </h1><p>
+      Ten thoughtful word lists. Every one is free to print, edit, and play.
+    </p>
+  </section><div class="template-directory">
+    {
+      templates.map((t, i) => (
+        <a class={`directory-card tone-${i % 4}`} href={`/templates/${t.id}/`}>
+          <>
+            <div class="directory-top">
+              <>
+                <span class="template-icon">{t.icon}</span>
+                <span class="small-pill">{t.category}</span>
+              </>
+            </div>
+            <h2>{t.name}</h2>
+            <p>{t.description}</p>
+            <div class="directory-bottom">
+              <>
+                <span>
+                  {t.words.length} words · {t.size} × {t.size}
+                </span>
+                <strong>Take a look ↗</strong>
+              </>
+            </div>
+          </>
+        </a>
+      ))
+    }
+  </div><AdSlot /></Layout
+>

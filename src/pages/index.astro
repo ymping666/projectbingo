@@ -1,0 +1,88 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Editor from '../components/Editor';
+import { generate } from '../lib/model';
+import { food, templates, templateDraft } from '../lib/templates';
+const initial = generate(templateDraft(food), {
+  paper: 'A4',
+  perPage: 2,
+  theme: 'ink',
+});
+---
+
+<Layout
+  title="Free printable Bingo card maker"
+  description="Create custom word Bingo cards, download a real print-ready PDF, and host the same card set. Free, with no account required."
+  ><section class="intro">
+    <div>
+      <div class="eyebrow"><span></span> A LITTLE PREP. A LOT OF PLAY.</div><h1>
+        Good times start<br class="mobile-break" /> with a <em>Bingo.</em><svg
+          class="hero-spark"
+          viewBox="0 0 30 38"
+          aria-hidden="true"
+          ><path d="M15 2v10M28 12l-8 5M28 30l-9-6M3 31l7-7M2 11l8 5"
+          ></path></svg>
+      </h1><p>
+        Your words. Beautiful printable cards. A game everyone can join.
+      </p>
+    </div><div class="intro-note">
+      <span aria-hidden="true">✳</span><p>
+        For the classroom.<br />For the party.<br /><strong
+          >For the fun of it.</strong>
+      </p>
+    </div>
+  </section><Editor initial={initial} client:load /><div class="trust-strip">
+    <span>✓ Always free</span><span>✓ No sign-up</span><span
+      >✓ Your words stay on your device</span
+    ><span>✓ Real, print-ready PDFs</span>
+  </div><section class="templates-section">
+    <div class="section-title">
+      <div>
+        <div class="section-eyebrow">A HEAD START ON THE FUN</div><h2>
+          Pick a theme. Make it yours.
+        </h2>
+      </div><a href="/templates/">Explore all 10 templates <span>↗</span></a>
+    </div><div class="template-cards">
+      {
+        templates.slice(0, 4).map((t, i) => (
+          <a href={`/templates/${t.id}/`} class={`template-tile tone-${i}`}>
+            <>
+              <span class="template-icon" aria-hidden="true">
+                {t.icon}
+              </span>
+              <span class="template-info">
+                <>
+                  <strong>{t.name}</strong>
+                  <small>
+                    {t.words.length} words · {t.size} × {t.size}
+                  </small>
+                </>
+              </span>
+              <span class="tile-arrow">↗</span>
+            </>
+          </a>
+        ))
+      }
+    </div>
+  </section><section class="explainer">
+    <div>
+      <span class="tiny-number">01</span><h3>Add your words</h3><p>
+        Use a ready-made theme or paste a list of your own. Make a game that
+        fits your gathering.
+      </p>
+    </div><div>
+      <span class="tiny-number">02</span><h3>Print your card set</h3><p>
+        Get distinct layouts in a crisp PDF, with a caller list and simple rules
+        in the game pack.
+      </p>
+    </div><div>
+      <span class="tiny-number">03</span><h3>Bring everyone together</h3><p>
+        Call words from the same activity. Check any full card ID when someone
+        shouts “Bingo!”
+      </p>
+    </div>
+  </section><p class="honest-note">
+    Distinct layouts don’t guarantee a single winner. Players may complete a
+    line at the same time. <a href="/how-to-play/">See the rules ↗</a>
+  </p></Layout
+>

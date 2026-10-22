@@ -1,0 +1,66 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { templates, templateDraft } from '../../lib/templates';
+import { generate } from '../../lib/model';
+import { CardView } from '../../components/shared';
+import AdSlot from '../../components/AdSlot.astro';
+export function getStaticPaths() {
+  return templates.map((t) => ({ params: { slug: t.id }, props: { t } }));
+}
+const { t } = Astro.props;
+const p = generate(
+  { ...templateDraft(t), count: 1 },
+  { paper: 'A4', perPage: 2, theme: 'ink' },
+);
+---
+
+<Layout title={`${t.name} Bingo cards`} description={t.description}
+  ><div class="breadcrumbs">
+    <a href="/templates/">All templates</a><span>/</span>{t.name}
+  </div><section class="template-detail">
+    <div>
+      <div class="eyebrow">{t.category.toUpperCase()}</div><h1>
+        {t.name}<br /><em>Bingo.</em>
+      </h1><p class="detail-description">{t.description}</p><div
+        class="detail-tags"
+      >
+        <span>{t.words.length} words</span><span>{t.size} × {t.size} grid</span
+        ><span>Free to customize</span>
+      </div><a class="button primary" href={`/?template=${t.id}`}
+        >Use this template <span>↗</span></a
+      ><h2>At your next gathering</h2><p>{t.tip}</p><p>
+        Print one distinct card per player. Call words from this list, and mark
+        a full row, column, or diagonal. The optional center FREE space starts
+        marked.
+      </p><a href="/how-to-play/">Read the full rules ↗</a>
+    </div><div class="template-sample">
+      <CardView project={p} card={p.cards[0]} /><p>
+        One real layout, generated from the word list below.
+      </p>
+    </div>
+  </section><section class="word-pool">
+    <div class="section-title">
+      <div>
+        <div class="section-eyebrow">WHAT’S IN THE GAME</div><h2>
+          The complete word list
+        </h2>
+      </div><span>{t.words.length} distinct entries</span>
+    </div><ul>{t.words.map((w: string) => <li>{w}</li>)}</ul>
+  </section><section class="article related">
+    <h2>Make it work for your group</h2><p>
+      Choose A4 or US Letter in portrait orientation. One card per page gives
+      the most room; two is a useful everyday choice. Check your PDF before
+      printing and use Actual size (100%). Long phrases may need fewer cards per
+      page.
+    </p><h2>Keep exploring</h2><div class="related-links">
+      {
+        templates
+          .filter((other) => other.id !== t.id)
+          .slice(0, 3)
+          .map((other) => (
+            <a href={`/templates/${other.id}/`}>{other.name} ↗</a>
+          ))
+      }
+    </div>
+  </section><AdSlot /></Layout
+>

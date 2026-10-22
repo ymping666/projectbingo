@@ -1,0 +1,155 @@
+---
+import Layout from '../layouts/Layout.astro';
+const pages = {
+  'how-to-play': {
+    title: 'How to play word Bingo',
+    intro: 'A few simple rules. A whole table of possibilities.',
+    sections: [
+      [
+        'Set the table',
+        'Create your word pool and generate a card set. Give each player one card and a pencil or counters. Keep the full card ID visible. Each card uses a different layout, but more than one player may win at once.',
+      ],
+      [
+        'Call and mark',
+        'Choose Start hosting from the card maker to open the same project. Call each displayed word aloud, then choose Next word. Players mark matching words. If the center FREE space is enabled, it is already marked. The ordinary word “FREE” in a custom word list is still a word that must be called.',
+      ],
+      [
+        'What counts as Bingo?',
+        'A complete horizontal row, vertical column, or either complete diagonal counts. No full-card rule is used. These are called-word cards; no signatures, player networking, or numbered balls are involved.',
+      ],
+      [
+        'Check a card',
+        'When someone calls Bingo, enter their full card ID in the host. The check highlights called words and any completed lines. It says whether the card meets this round’s line rule; it cannot establish who finished first. A card from another project will be rejected.',
+      ],
+      [
+        'Undo or play again',
+        'Undo moves back one call. Next word then restores the same word. Start a new round asks for confirmation, clears calls, and shuffles a fresh calling order while keeping your card set. When all words have been called, the host clearly shows the round is complete.',
+      ],
+      [
+        'Play away from the screen',
+        'The game pack includes a full caller list and rules. For manual play, call words in a shuffled order and keep a record. The web checker uses only calls recorded in the web host, so paper calls do not automatically update it. Save project JSON to retain the actual cards and web calling progress.',
+      ],
+    ],
+  },
+  'printing-guide': {
+    title: 'A better Bingo printout',
+    intro: 'A few small settings make a big difference on paper.',
+    sections: [
+      [
+        'Match the paper',
+        'Select A4 or US Letter to match your loaded paper. Both layouts are portrait, with at least half an inch of space around the content. Choose the same paper size in your PDF viewer and printer settings.',
+      ],
+      [
+        'Choose your card size',
+        'One card per page gives the largest grid. Two cards per page is a useful balance for everyday play. Four cards per page saves paper, especially for 3 × 3 games. Long phrases in a 5 × 5 grid may not fit four per page.',
+      ],
+      [
+        'Use Actual size / 100%',
+        'Open the downloaded PDF, choose Actual size or 100%, and turn off any additional fit-to-page scaling. Print one sheet first to check margins and readability before printing the full set. Browser page printing is not needed.',
+      ],
+      [
+        'Ink, sage, or plum',
+        'Ink saver is the default black-and-white style. Sage and plum add a restrained color to the FREE cell. All information remains available as text, including the Colors template.',
+      ],
+      [
+        'Text that fits',
+        'The PDF embeds the local, openly licensed Lato font and measures its real letter widths. Text wraps first, then adjusts down to a minimum of 10 pt. If a title or word will not fit, export stops and identifies it. Shorten the text or choose fewer cards per page. No text is silently cut off.',
+      ],
+      [
+        'Accents and other characters',
+        'Common Latin accents, curly quotes, and punctuation are supported. This first version does not promise all languages, complex-script shaping, or emoji. An unsupported character is reported before a PDF is downloaded.',
+      ],
+      [
+        'Count the pages',
+        'Cards only includes player sheets. The game pack adds a full caller list and one rules page. For example, 200 cards at four per page gives 50 player pages, plus the extra materials. A partially filled last sheet stays partially empty.',
+      ],
+      [
+        'Keep the project',
+        'Save the project JSON alongside your PDF. It preserves the card layouts and IDs, so you can restore the same activity for hosting. Changing paper or color keeps those cards; generating edited content creates a new project ID.',
+      ],
+    ],
+  },
+  about: {
+    title: 'A little prep. A lot of play.',
+    intro: 'Bingo Print Kit turns your own words into a shared activity.',
+    sections: [
+      [
+        'Built for the gathering',
+        'This independent tool is for teachers, library staff, families, and event organizers who want a simple text Bingo activity. Pick a template or supply your own list, print distinct cards, and host the same activity on your device.',
+      ],
+      [
+        'The essentials are free',
+        'There is no subscription, payment, registration, or account requirement. You can make 1–200 cards, export a real PDF, call words, verify cards, and save a project JSON.',
+      ],
+      [
+        'A focused first edition',
+        'This edition supports custom text in 3 × 3 or 5 × 5 grids. It does not include image cards, AI generation, multiplayer rooms, voice, music, or standard 75-ball and 90-ball number games.',
+      ],
+      [
+        'Honest about the details',
+        'Different layouts do not guarantee only one winner. The host checks the recorded calls against a card; it does not determine who was first. We do not claim teacher certification or paper testing we have not performed.',
+      ],
+      [
+        'Keep a copy',
+        'Your latest activity is stored in this browser where storage is available. A downloaded project JSON is the portable backup. The temporary product name and any future contact address are maintained in one site configuration file. No contact form is offered until a real contact route is available.',
+      ],
+    ],
+  },
+  privacy: {
+    title: 'Your words stay with you.',
+    intro: 'Local tools, a clear data trail, and no account to create.',
+    sections: [
+      [
+        'What runs on your device',
+        'Word cleanup, card generation, PDF creation, hosting, and verification run in your browser. Your titles, words, card layouts, and project JSON are not sent to our server, analytics, or error reporting, and are not placed in URLs. Template selection may use a public template ID in the URL.',
+      ],
+      [
+        'What the browser saves',
+        'We use localStorage to keep the latest project, including the word pool, real card matrices, print settings, calling order, and current progress. Browser storage can fail or be cleared. Save the JSON if the activity matters to you. It contains your content, so share the file only with people you choose.',
+      ],
+      [
+        'Imports and downloads',
+        'An imported JSON file is read locally, validated as a whole, and replaces the current project only after confirmation. PDF files and exported JSON are generated locally and saved through your browser’s download mechanism.',
+      ],
+      [
+        'Site requests',
+        'Your browser requests the static site files, JavaScript, and locally hosted font from the site’s hosting provider. Hosting infrastructure may process ordinary request metadata such as an IP address and user agent. Your Bingo content is not included in those requests.',
+      ],
+      [
+        'Advertising and statistics',
+        'Advertising and analytics are disabled in this release. No advertising SDK, tracking script, or third-party font CDN is loaded. If these services are enabled later, this notice must be updated before those scripts are used. Future statistics must exclude titles, words, card content, and project files.',
+      ],
+      [
+        'Remove local data',
+        'Use your browser’s site-data controls to clear saved data for this site. This deletes local activity storage. It does not delete PDFs or JSON files you previously downloaded. No account or remote content record is created by this tool.',
+      ],
+    ],
+  },
+};
+export function getStaticPaths() {
+  return ['how-to-play', 'printing-guide', 'about', 'privacy'].map((page) => ({
+    params: { page },
+  }));
+}
+const content = pages[Astro.params.page as keyof typeof pages];
+---
+
+<Layout title={content.title} description={content.intro}
+  ><section class="page-intro">
+    <div class="eyebrow">BINGO PRINT KIT</div><h1>{content.title}</h1><p>
+      {content.intro}
+    </p>
+  </section><article class="article">
+    {
+      content.sections.map(([heading, text]) => (
+        <section>
+          <>
+            <h2>{heading}</h2>
+            <p>{text}</p>
+          </>
+        </section>
+      ))
+    }<a href="/" class="button primary"
+      >Make your Bingo cards <span>↗</span></a>
+  </article></Layout
+>
