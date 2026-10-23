@@ -48,7 +48,7 @@ The two public addresses have separate local storage. At the old preview, choose
 
 An empty `PUBLIC_CONTACT_EMAIL` hides Contact. Do not invent an email address. Ads remain disabled; no AdSense ID or ads.txt is supplied.
 
-GA4 is off until a real `PUBLIC_GA4_ID` and `PUBLIC_GA4_MANUAL_ONLY=true` are set as **Cloudflare build variables**, followed by a rebuild. Before setting that flag, turn **off every Enhanced Measurement option** in that stream (including page changes, forms, file downloads and search); the flag records that platform setup, it cannot change the GA property. Never put service credentials in public variables.
+Public production defaults are recorded in `config/analytics.production.json` and applied by the build script. Cloudflare build variables or a local environment file can override them. `PUBLIC_GA4_ID` is a public Measurement ID, never a credential. `PUBLIC_GA4_MANUAL_ONLY=true` may be recorded only after Enhanced Measurement is disabled on that stream; it confirms the platform setting and cannot change it. Setting the flag to false disables this integration. Preview builds always force the ID empty and this flag false. Rebuild after any configuration change. Never put service credentials in public variables.
 
 Only an indexable production build on exactly `https://bingocardkit.com` can request Google’s script, and only after opt-in. Preview, localhost and automated browsers send nothing. The footer allows rejection/withdrawal; failed statistics do not block the activity. Build-time CSP allows Google only when configured. Privacy follows the actual build configuration.
 

@@ -80,3 +80,17 @@ it('prevents all Google script loading in preview and automated browsers', async
     get: () => false,
   });
 });
+
+it('keeps Google disabled when the manual-only confirmation or real ID is absent', async () => {
+  vi.stubEnv('PUBLIC_GA4_MANUAL_ONLY', 'false');
+  let a = await import('./analytics');
+  expect(a.analyticsConfigured).toBe(false);
+  expect(await a.setAnalyticsConsent(true)).toBe(false);
+  vi.resetModules();
+  vi.stubEnv('PUBLIC_GA4_MANUAL_ONLY', 'true');
+  vi.stubEnv('PUBLIC_GA4_ID', '');
+  a = await import('./analytics');
+  expect(a.analyticsConfigured).toBe(false);
+  expect(await a.setAnalyticsConsent(true)).toBe(false);
+  expect(document.head.append).not.toHaveBeenCalled();
+});
