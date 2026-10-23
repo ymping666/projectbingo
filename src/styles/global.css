@@ -2163,3 +2163,5 @@ details select {
     flex-wrap: wrap;
   }
 }
+
+.brand-mark.brand-image { display: block; padding: 0; }
