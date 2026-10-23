@@ -167,7 +167,7 @@ export async function setAnalyticsConsent(allow: boolean): Promise<boolean> {
   w.gtag = function () {
     w.dataLayer!.push(arguments);
   };
-  // The Google script is requested only after opt-in; there are no pre-consent pings.
+  // Production defaults to enabled; a saved opt-out prevents script loading.
   w.gtag('consent', 'default', {
     analytics_storage: 'granted',
     ad_storage: 'denied',
