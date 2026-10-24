@@ -70,6 +70,11 @@ export const guides: Guide[] = [
         text: 'One person reads the displayed word; an adult or older reader may help a child find the text. Avoid revealing the next call early. Check a claim with its full card ID. Multiple players may win together. Between rounds, rotate the caller and choose Start a new round to retain the cards.',
       },
       {
+        title: 'Try a music round',
+        text: 'For Music Bingo, replace the example song titles with a shared playlist and print the cards. Play songs in your own music player, mark titles as they are heard, and use the printed checklist to confirm a line manually. Music playback and playlist importing are not built into the website.',
+        links: [['music-bingo', 'Make Music Bingo cards']],
+      },
+      {
         title: 'Keep the printed set together',
         text: 'Changing the word pool requires a new generated activity and new printouts. To repeat tonight’s exact layouts, retain the JSON beside the PDF. The fixed sample below is an example only; generate your own set to use web verification.',
         links: [

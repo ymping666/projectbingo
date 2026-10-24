@@ -284,7 +284,9 @@ export async function exportPdf(
             `How to play: ${p.title}`,
             p.mode === 'people'
               ? 'Meet people who match the prompts. Ask before writing a name on the printed line. Anyone can pass. Decide in advance whether a name may appear more than once. Do not enter names on the website.'
-              : 'Observe events or items during the agreed activity. Mark a matching entry only when it happens. Agree on what counts before play. The website does not detect real-world events.',
+              : p.templateId === 'music-bingo'
+                ? 'Play songs in your own music player. Agree whether a short clip or the full song counts. Players mark a song title only after hearing it. Record each played title on the activity checklist. The website does not play music, import playlists or recognize songs.'
+                : 'Observe events or items during the agreed activity. Mark a matching entry only when it happens. Agree on what counts before play. The website does not detect real-world events.',
             `Give each player a card. ${p.free ? 'Mark the center FREE space at the start.' : 'There is no FREE space.'}`,
             'A full row, column or diagonal is a line. Ask the organizer to confirm a win manually. The web caller and checker do not verify these observations or personal conditions.',
             'Save the project JSON if you need the same layouts again. Print at Actual size / 100%. Use one card per sheet for generous handwriting room.',

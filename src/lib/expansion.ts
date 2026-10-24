@@ -450,6 +450,30 @@ export const expansionTemplates: Template[] = [
     ],
   },
   {
+    id: 'music-bingo',
+    name: 'Music',
+    icon: '♫',
+    size: 5,
+    category: 'Activities',
+    mode: 'observed',
+    description:
+      'Make printable Music Bingo cards from song titles. Start with 30 example songs or paste your own playlist for a party, listening session or fan gathering.',
+    tip: 'Play songs in an external player and mark a title when you hear it. Replace the example list with your own songs before generating; the website does not play audio or import playlists.',
+    words: words(
+      'Dancing Queen|Happy|Uptown Funk|Shake It Off|Dynamite|Butter|Spring Day|Permission to Dance|Billie Jean|Thriller|September|Levitating|Blinding Lights|Rolling in the Deep|Someone Like You|Firework|Roar|Bad Romance|Poker Face|Viva La Vida|Yellow|Stand by Me|Hey Jude|Here Comes the Sun|Take On Me|Africa|Sweet Caroline|I Wanna Dance with Somebody|Girls Just Want to Have Fun|Walking on Sunshine',
+    ),
+    notes: [
+      'Use this song-title template for a birthday party, family music night or fan listening session. The 30 titles are editable examples, not a supplied playlist. For BTS or K-pop Bingo, replace the whole list with the songs your group knows, one title per line. Add artist names if different songs share a title.',
+      'Print the cards, then play songs in your own music player. Agree whether a short clip or the full song counts, and mark only titles actually played. Keep a record on the printed activity checklist and confirm a completed row, column or diagonal manually. There is no Spotify import, music playback, song recognition or automatic checking of the listening session.',
+      'Start with 5 × 5 and a FREE center: each card contains 24 song titles. To fill all 25 squares with songs, turn FREE off and supply at least 25 distinct titles. Use 3 × 3 for a short round. Print one card per sheet for long titles, or two per A4 or Letter sheet for compact cards. Save project JSON to reprint the same layouts.',
+    ],
+    relatedIds: [
+      'birthday-bingo',
+      'office-buzzword-bingo',
+      'conference-call-bingo',
+    ],
+  },
+  {
     id: 'office-buzzword-bingo',
     name: 'Office Buzzword',
     icon: '↗',

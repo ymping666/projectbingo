@@ -10,9 +10,9 @@ import { startCaller, moveCaller, parseCaller } from './caller';
 import { publicPaths, templateIds, presetIds } from './routes';
 import { safeParameters, safePageLocation } from './analytics';
 const print = { paper: 'A4', perPage: 1, theme: 'ink' } as const;
-it('publishes 50 distinct routes with all templates and presets in the safe registry', () => {
-  expect(publicPaths).toHaveLength(50);
-  expect(new Set(publicPaths).size).toBe(50);
+it('publishes 51 distinct routes with all templates and presets in the safe registry', () => {
+  expect(publicPaths).toHaveLength(51);
+  expect(new Set(publicPaths).size).toBe(51);
   expect(templateIds).toEqual(templates.map((t) => t.id));
   expect(presetIds).toEqual(allPresets.map((t) => t.id));
   for (const path of publicPaths)

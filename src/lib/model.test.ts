@@ -195,8 +195,8 @@ describe('atomic JSON validation', () => {
     expect(() => parseProject(' '.repeat(2 * 1024 * 1024 + 1))).toThrow('2 MB');
   });
 });
-it('ships thirty-four distinct useful templates and exactly 50 food words', () => {
-  expect(templates).toHaveLength(34);
+it('ships thirty-five distinct useful templates and exactly 50 food words', () => {
+  expect(templates).toHaveLength(35);
   expect(food.words).toHaveLength(50);
   for (const t of templates) {
     expect(new Set(t.words).size).toBe(t.words.length);

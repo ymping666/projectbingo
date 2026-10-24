@@ -31,6 +31,7 @@ export const templateIds = [
   'easter-bingo',
   'st-patricks-day-bingo',
   'halloween-bingo',
+  'music-bingo',
   'office-buzzword-bingo',
   'conference-call-bingo',
 ];
