@@ -27,6 +27,7 @@ import { CardView, ProjectTools, Notice, useProject, download } from './shared';
 import { HostSession } from './Host';
 import TemplatePicker from './TemplatePicker';
 import { ChoiceGroup } from './ChoiceGroup';
+import { cardTheme } from '../lib/card-themes';
 export default function Editor({ initial }: { initial: Project }) {
   const { project, setProject, ready, save } = useProject(initial);
   const p = project!;
@@ -391,25 +392,36 @@ export default function Editor({ initial }: { initial: Project }) {
               <summary>
                 <SlidersHorizontal size={14} /> Appearance
               </summary>
-              <ChoiceGroup
-                label="Print color"
-                value={p.print.theme}
-                disabled={!ready}
-                onChange={(theme) => print('theme', theme as Print['theme'])}
-                options={[
-                  { value: 'ink', label: 'Ink saver', detail: 'Black & white' },
-                  {
-                    value: 'sage',
-                    label: 'Sage green',
-                    detail: 'Garden party',
-                  },
-                  {
-                    value: 'plum',
-                    label: 'Soft plum',
-                    detail: 'A little confetti',
-                  },
-                ]}
-              />
+              <div className="card-style-options">
+                <ChoiceGroup
+                  label="Print style"
+                  value={p.print.theme}
+                  disabled={!ready}
+                  onChange={(theme) => print('theme', theme as Print['theme'])}
+                  options={[
+                    {
+                      value: 'themed',
+                      label: 'Theme colors',
+                      detail: cardTheme(p.templateId).name,
+                    },
+                    {
+                      value: 'ink',
+                      label: 'Ink saver',
+                      detail: 'Black & white',
+                    },
+                    {
+                      value: 'sage',
+                      label: 'Sage green',
+                      detail: 'Garden party',
+                    },
+                    {
+                      value: 'plum',
+                      label: 'Soft plum',
+                      detail: 'A little confetti',
+                    },
+                  ]}
+                />
+              </div>
             </details>
           </div>
           <button

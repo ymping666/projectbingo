@@ -87,18 +87,21 @@ describe('real card snapshots', () => {
     expect(q.id).not.toBe(p.id);
     expect(() => checkCard(q, p.cards[0].id)).toThrow('not found');
   });
-  it('keeps cards and round when print settings change', () => {
-    const p = advance(make(), 6),
-      before = JSON.stringify(p);
-    const q = {
-      ...p,
-      print: { paper: 'Letter', perPage: 4, theme: 'sage' } as const,
-    };
-    expect(q.cards).toBe(p.cards);
-    expect(q.round).toBe(p.round);
-    expect(JSON.stringify(p)).toBe(before);
-    expect(parseProject(JSON.stringify(q))).toEqual(q);
-  });
+  it.each(['ink', 'sage', 'plum', 'themed'] as const)(
+    'keeps cards and round when print settings change to %s',
+    (theme) => {
+      const p = advance(make(), 6),
+        before = JSON.stringify(p);
+      const q = {
+        ...p,
+        print: { paper: 'Letter', perPage: 4, theme } as const,
+      };
+      expect(q.cards).toBe(p.cards);
+      expect(q.round).toBe(p.round);
+      expect(JSON.stringify(p)).toBe(before);
+      expect(parseProject(JSON.stringify(q))).toEqual(q);
+    },
+  );
 });
 describe('explicit line checks', () => {
   for (const size of [3, 5] as const)

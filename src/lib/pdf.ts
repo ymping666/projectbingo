@@ -3,7 +3,7 @@ import fontkit from '@pdf-lib/fontkit';
 import type { Project } from './model';
 import { withBase } from './url';
 import { config } from './config';
-import { cardHeader, cardAllowance, printPalettes } from './card-art';
+import { cardHeader, cardAllowance, cardStyle } from './card-art';
 import {
   drawBrandMark,
   drawCardHeading,
@@ -160,7 +160,7 @@ export async function exportPdf(
     areaH = (ph - margin * 2 - 16 - gap * (rows - 1)) / rows;
   const side = Math.min(areaW, areaH - cardAllowance);
   const wordMap = new Map(p.words.map((w) => [w.id, w.text]));
-  const palette = printPalettes[p.print.theme];
+  const { palette } = cardStyle(p.print.theme, p.templateId);
   const accent = pdfColor(palette.light);
   let page: PDFPage | undefined;
   const cardPages = Math.ceil(p.cards.length / p.print.perPage);
@@ -177,9 +177,9 @@ export async function exportPdf(
       row = Math.floor(slot / cols),
       x = margin + column * (areaW + gap) + (areaW - side) / 2,
       top = ph - margin - row * (areaH + gap);
-    drawCardFrame(page!, x, top, side, p.print.theme);
+    drawCardFrame(page!, x, top, side, p.print.theme, p.templateId);
     centered(page!, font, p.title, x + 8, top - 32, side - 16, 32, 16);
-    drawCardHeading(page!, font, x, top, side, p.print.theme);
+    drawCardHeading(page!, font, x, top, side, p.print.theme, p.templateId);
     const cell = side / p.size,
       gridTop = top - cardHeader;
     for (let j = 0; j < p.size ** 2; j++) {

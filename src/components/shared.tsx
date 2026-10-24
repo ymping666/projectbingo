@@ -11,6 +11,7 @@ import { config } from '../lib/config';
 import { track, projectParameters } from '../lib/analytics';
 import { longestWordEm, needsWordBreak } from '../lib/card-text';
 import { BrandMark, BingoHeading } from './BrandMark';
+import { cardStyle } from '../lib/card-art';
 export function download(data: BlobPart, name: string, type: string) {
   const url = URL.createObjectURL(new Blob([data], { type }));
   const a = document.createElement('a');
@@ -144,12 +145,24 @@ export function CardView({
   winning?: Set<number>;
 }) {
   const words = new Map(project.words.map((w) => [w.id, w.text]));
+  const { palette } = cardStyle(project.print.theme, project.templateId);
   return (
     <div
       className={`bingo-card theme-${project.print.theme} mode-${project.mode || 'called'}`}
+      style={
+        {
+          '--card-dark': palette.dark,
+          '--card-light': palette.light,
+          '--card-line': palette.line,
+          '--card-accent': palette.accent,
+        } as React.CSSProperties
+      }
     >
       <div className="card-title">{project.title}</div>
-      <BingoHeading />
+      <BingoHeading
+        theme={project.print.theme}
+        templateId={project.templateId}
+      />
       <div
         className="bingo-grid"
         style={

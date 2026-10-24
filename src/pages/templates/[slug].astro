@@ -49,6 +49,10 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
             : 'Generate your own activity before hosting.'
         }
       </p>
+      <p>
+        For this look in the card maker, open Appearance and choose Theme
+        colors.
+      </p>
     </div>
   </section>
   {
@@ -218,7 +222,7 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
     )
   }
   {
-    t.notes && (
+    (t.notes || (!content && !t.variants)) && (
       <section class="article">
         <>
           <h2>Inspect a fixed sample</h2>
@@ -277,7 +281,8 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
           t.mode === 'observed'
             ? 'Organize an icebreaker'
             : 'Plan vocabulary practice'
-        }</a>
+        }</a
+      >
     </p>
   </section><AdSlot /></Layout
 >

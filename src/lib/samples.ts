@@ -1,16 +1,19 @@
 import { generate } from './model';
 import { expansionTemplates } from './expansion';
-import { templateDraft, type Template } from './templates';
+import { templates, templateDraft, type Template } from './templates';
 
 export const featuredIds = [
-  'food-vocabulary-bingo',
-  'classroom-objects-bingo',
-  'christmas-bingo',
-  'sight-word-bingo',
-  'alphabet-bingo',
-  'numbers-1-20-bingo',
-  'thanksgiving-bingo',
-  ...expansionTemplates.map((t) => t.id),
+  ...new Set([
+    'food-vocabulary-bingo',
+    'classroom-objects-bingo',
+    'christmas-bingo',
+    'sight-word-bingo',
+    'alphabet-bingo',
+    'numbers-1-20-bingo',
+    'thanksgiving-bingo',
+    ...expansionTemplates.map((t) => t.id),
+    ...templates.map((t) => t.id),
+  ]),
 ];
 export function sampleProject(t: Template, variant?: string) {
   let seed = 173 + t.words.length;
@@ -39,7 +42,7 @@ export function sampleProject(t: Template, variant?: string) {
       title: `${t.name} Bingo${variant ? ` ${variant}` : ''} (Sample)`,
       count: 2,
     },
-    { paper: 'A4', perPage: 2, theme: 'ink' },
+    { paper: 'A4', perPage: 2, theme: 'themed' },
     rng,
     id,
   );

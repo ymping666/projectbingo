@@ -48,4 +48,30 @@ for name in ['literal-free-logo', 'literal-free-no-logo']:
         assert (len(region.curves) >= 10) == p['free'], 'Logo presence differs from saved FREE setting'
         assert all(c['size'] >= 9.99 for c in page.chars), 'Text smaller than 10 pt'
 print('Literal FREE stays a playable word; center logo follows the saved free-space setting.')
+for project_file in (root / 'themes').glob('*.json'):
+    p = json.loads(project_file.read_text(encoding='utf-8'))
+    words = {w['id']: w['text'] for w in p['words']}
+    with pdfplumber.open(project_file.with_suffix('.pdf')) as pdf:
+        page = pdf.pages[0]
+        side = min(page.width - 72, page.height - 88 - 76)
+        x = (page.width - side) / 2
+        cell_width = side / p['size']
+        for j, cell in enumerate(p['cards'][0]['cells']):
+            left = x + j % p['size'] * cell_width
+            top = 36 + 58 + j // p['size'] * cell_width
+            # The top portion contains the prompt in meet-and-write activities.
+            bottom = top + cell_width * (0.68 if p.get('mode') == 'people' and cell['kind'] != 'free' else 1)
+            extracted = page.crop((left + .5, top + .5, left + cell_width - .5, bottom - .5)).extract_text() or ''
+            expected = '' if cell['kind'] == 'free' else words[cell['wordId']]
+            assert re.sub(r'\s+', '', extracted) == re.sub(r'\s+', '', expected), (p['templateId'], j, extracted, expected)
+        # The existing meet-and-write form uses an 8 pt "Name" caption;
+        # playable entries and all other text still have a 10 pt minimum.
+        captions = [c for c in page.chars if c['size'] < 9.99]
+        if p.get('mode') == 'people':
+            assert ''.join(c['text'] for c in captions) == 'Name' * (p['size'] ** 2 - int(p['free']))
+            assert all(abs(c['size'] - 8) < .01 for c in captions)
+        else:
+            assert not captions, p['templateId']
+        assert len(page.crop((x, 67, x + 35, 91)).curves) > 0, 'Missing template header motif'
+print('Every themed template PDF: word positions, minimum font sizes and vector header artwork verified.')
 print('Real PDF extraction: positions, IDs, non-full sheets, font minimum and 200-card page count verified.')

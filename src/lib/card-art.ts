@@ -1,3 +1,5 @@
+import { cardTheme, type CardPalette } from './card-themes';
+import type { Print } from './model';
 // Vector geometry from the existing Bingo Card Kit favicon; shared by screen and PDF.
 const rounded = (x: number, y: number, w: number, h: number, r: number) =>
   `M${x + r} ${y}H${x + w - r}Q${x + w} ${y} ${x + w} ${y + r}V${y + h - r}Q${x + w} ${y + h} ${x + w - r} ${y + h}H${x + r}Q${x} ${y + h} ${x} ${y + h - r}V${y + r}Q${x} ${y} ${x + r} ${y}Z`;
@@ -41,6 +43,26 @@ export const printPalettes = {
     festive: true,
   },
 } as const;
+export function cardStyle(theme: Print['theme'], templateId?: string) {
+  const profile = cardTheme(templateId);
+  const palette: CardPalette =
+    theme === 'themed' ? profile.palette : printPalettes[theme];
+  const fills =
+    theme === 'plum'
+      ? [palette.dark, '#eed3df', '#e2ebc7', '#f4dfbd', palette.dark]
+      : theme === 'themed'
+        ? [
+            palette.dark,
+            palette.accent,
+            '#ffffff',
+            palette.accent,
+            palette.dark,
+          ]
+        : [...'BINGO'].map((_, i) =>
+            theme === 'sage' && i % 2 === 0 ? palette.dark : palette.accent,
+          );
+  return { palette, fills, motif: profile.motif };
+}
 export const cardHeader = 58;
 export const cardAllowance = 76; // Header plus one compact, readable footer row.
 export const roundedPath = rounded;

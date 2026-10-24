@@ -2,7 +2,8 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { PDFDocument } from 'pdf-lib';
 import { generate, type Print } from '../src/lib/model';
-import { food, templateDraft } from '../src/lib/templates';
+import { food, templateDraft, allPresets } from '../src/lib/templates';
+import { cardThemes } from '../src/lib/card-themes';
 import { exportPdf } from '../src/lib/pdf';
 const font = new Uint8Array(await readFile('public/fonts/Lato-Regular.ttf'));
 await mkdir('output/pdf', { recursive: true });
@@ -100,4 +101,45 @@ for (const free of [true, false]) {
 }
 console.log(
   `40-card A4 game pack: ${pack.cardPages} player + ${pack.extraPages} extra pages. Latin punctuation exports; missing glyphs and overflow reject clearly.`,
+);
+// Exercise every preset's artwork through the real exporter, including image paths,
+// names to write for icebreakers, and the widest four-up header arrangement.
+await mkdir('output/pdf/themes', { recursive: true });
+for (const t of allPresets) {
+  assert(t.id in cardThemes, `Missing card design for ${t.id}`);
+  const project = generate(
+    { ...templateDraft(t), count: 1 },
+    {
+      paper: 'A4',
+      perPage: 1,
+      theme: 'themed',
+    },
+  );
+  const result = await exportPdf(project, false, font);
+  assert.equal((await PDFDocument.load(result.bytes)).getPageCount(), 1);
+  await writeFile(`output/pdf/themes/${t.id}.pdf`, result.bytes);
+  await writeFile(`output/pdf/themes/${t.id}.json`, JSON.stringify(project));
+}
+for (const templateId of [
+  'christmas-bingo',
+  'halloween-bingo',
+  'winter-bingo',
+  'alphabet-bingo',
+]) {
+  const t = allPresets.find((t) => t.id === templateId)!;
+  for (const paper of ['A4', 'Letter'] as const) {
+    const project = generate(
+      { ...templateDraft(t), count: 4 },
+      { paper, perPage: 4, theme: 'themed' },
+    );
+    assert.equal(
+      (
+        await PDFDocument.load((await exportPdf(project, false, font)).bytes)
+      ).getPageCount(),
+      1,
+    );
+  }
+}
+console.log(
+  `All ${allPresets.length} template and activity designs export, plus dense seasonal A4/Letter layouts.`,
 );

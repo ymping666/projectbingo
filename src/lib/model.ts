@@ -5,7 +5,7 @@ export type Card = { id: string; cells: Cell[] };
 export type Print = {
   paper: 'A4' | 'Letter';
   perPage: 1 | 2 | 4;
-  theme: 'ink' | 'sage' | 'plum';
+  theme: 'ink' | 'sage' | 'plum' | 'themed';
 };
 export type Project = {
   schemaVersion: 1;
@@ -312,7 +312,7 @@ export function parseProject(text: string): Project {
     p.print &&
       ['A4', 'Letter'].includes(p.print.paper) &&
       [1, 2, 4].includes(p.print.perPage) &&
-      ['ink', 'sage', 'plum'].includes(p.print.theme),
+      ['ink', 'sage', 'plum', 'themed'].includes(p.print.theme),
     'Invalid print settings.',
   );
   assert(

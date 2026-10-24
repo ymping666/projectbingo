@@ -2192,6 +2192,13 @@ details select {
   --card-accent: #ecd5df;
   background: linear-gradient(to bottom, var(--card-light) 0 96px, white 96px);
 }
+.bingo-card.theme-themed {
+  background: linear-gradient(to bottom, var(--card-light) 0 96px, white 96px);
+}
+.card-style-options .choice-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 .bingo-card .card-title {
   font-family: Lato, Arial, sans-serif;
   font-size: 20px;
@@ -2221,29 +2228,11 @@ details select {
   font-weight: 400;
   background: var(--card-accent, white);
 }
-.theme-sage .bingo-heading > span:nth-child(odd),
-.theme-plum .bingo-heading > span:nth-child(odd) {
-  background: var(--card-dark);
-  color: white;
-}
-.theme-plum .bingo-heading > span:nth-child(2) {
-  background: #eed3df;
-}
-.theme-plum .bingo-heading > span:nth-child(3) {
-  background: #e2ebc7;
-  color: var(--card-dark);
-}
-.theme-plum .bingo-heading > span:nth-child(4) {
-  background: #f4dfbd;
-}
-.theme-sage .bingo-heading::before,
-.theme-sage .bingo-heading::after,
-.theme-plum .bingo-heading::before,
-.theme-plum .bingo-heading::after {
-  content: '✧';
-  font-size: 21px;
-  color: var(--card-dark);
-  margin: 0 4px;
+.card-ornament {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 21px;
+  margin: 0 3px;
 }
 .bingo-card .bingo-grid,
 .bingo-card .bingo-cell {

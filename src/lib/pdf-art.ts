@@ -2,11 +2,12 @@ import { rgb, type PDFPage, type PDFFont } from 'pdf-lib';
 import {
   brandShapes,
   brandColors,
-  printPalettes,
+  cardStyle,
   roundedPath,
   cardAllowance,
 } from './card-art';
 import type { Print } from './model';
+import { motifs } from './card-themes';
 
 export const pdfColor = (hex: string) =>
   rgb(
@@ -40,20 +41,14 @@ export function drawCardHeading(
   top: number,
   side: number,
   theme: Print['theme'],
+  templateId?: string,
 ) {
-  const palette = printPalettes[theme];
+  const { palette, fills, motif } = cardStyle(theme, templateId);
   const step = 27,
     radius = 10;
   for (const [i, letter] of [...'BINGO'].entries()) {
     const cx = x + side / 2 + (i - 2) * step;
-    const dark =
-      theme === 'plum' ? i === 0 || i === 4 : theme === 'sage' && i % 2 === 0;
-    const fill =
-      theme === 'plum'
-        ? ['#674b70', '#eed3df', '#e2ebc7', '#f4dfbd', '#674b70'][i]
-        : dark
-          ? palette.dark
-          : palette.accent;
+    const fill = fills[i];
     page.drawCircle({
       x: cx,
       y: top - 43,
@@ -67,21 +62,17 @@ export function drawCardHeading(
       y: top - 47.5,
       size: 13,
       font,
-      color: pdfColor(dark ? '#ffffff' : palette.dark),
+      color: pdfColor(fill === palette.dark ? '#ffffff' : palette.dark),
     });
   }
-  if (palette.festive) {
-    for (const sx of [x + 15, x + side - 15]) {
-      page.drawSvgPath('M0 6L4 4L6 0L8 4L12 6L8 8L6 12L4 8Z', {
-        x: sx - 6,
-        y: top - 37,
-        color: pdfColor(palette.dark),
-      });
-      page.drawCircle({
-        x: sx + (sx < x + side / 2 ? 12 : -12),
-        y: top - 51,
-        size: 1.7,
-        color: pdfColor(palette.dark),
+  for (const sx of [x + 18, x + side - 18]) {
+    for (const path of motifs[motif]) {
+      page.drawSvgPath(path, {
+        x: sx - 9,
+        y: top - 34,
+        scale: 0.75,
+        borderColor: pdfColor(palette.dark),
+        borderWidth: 1.3,
       });
     }
   }
@@ -92,17 +83,19 @@ export function drawCardFrame(
   top: number,
   side: number,
   theme: Print['theme'],
+  templateId?: string,
 ) {
+  const { palette } = cardStyle(theme, templateId);
   if (theme !== 'ink')
     page.drawSvgPath(roundedPath(0, 0, side + 16, 60, 9), {
       x: x - 8,
       y: top + 5,
-      color: pdfColor(printPalettes[theme].light),
+      color: pdfColor(palette.light),
     });
   page.drawSvgPath(roundedPath(0, 0, side + 16, side + cardAllowance + 5, 9), {
     x: x - 8,
     y: top + 5,
-    borderColor: pdfColor(printPalettes[theme].line),
+    borderColor: pdfColor(palette.line),
     borderWidth: 0.6,
   });
 }
