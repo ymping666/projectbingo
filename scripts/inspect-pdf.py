@@ -16,22 +16,36 @@ for paper in ['A4', 'Letter']:
             pw, ph = pdf.pages[0].width, pdf.pages[0].height
             cols, rows = (2 if per_page == 4 else 1), (1 if per_page == 1 else 2)
             aw, ah = (pw - 72 - 18 * (cols - 1)) / cols, (ph - 88 - 18 * (rows - 1)) / rows
-            side = min(aw, ah - 62)
+            side = min(aw, ah - 76)
             for i, card in enumerate(p['cards']):
                 page = pdf.pages[i // per_page]
                 slot = i % per_page
                 x = 36 + slot % cols * (aw + 18) + (aw - side) / 2
-                top = 36 + slot // cols * (ah + 18) + 60
+                top = 36 + slot // cols * (ah + 18) + 58
                 for j, cell in enumerate(card['cells']):
                     cw = side / p['size']
                     left, upper = x + j % p['size'] * cw, top + j // p['size'] * cw
                     extracted = page.crop((left + .5, upper + .5, left + cw - .5, upper + cw - .5)).extract_text() or ''
-                    expected = 'FREE' if cell['kind'] == 'free' else words[cell['wordId']]
+                    expected = '' if cell['kind'] == 'free' else words[cell['wordId']]
                     assert re.sub(r'\s+', '', extracted) == re.sub(r'\s+', '', expected), (name, card['id'], j, extracted, expected)
+                    if cell['kind'] == 'free':
+                        assert len(page.crop((left + .5, upper + .5, left + cw - .5, upper + cw - .5)).curves) >= 10, 'Missing vector logo'
             for page in pdf.pages:
                 ids.extend(re.findall(r'Card ([A-F0-9]{8}-\d{3})', page.extract_text()))
                 assert all(c['size'] >= 9.99 for c in page.chars), 'Text smaller than 10 pt'
         assert ids == [c['id'] for c in p['cards']], (name, ids)
         print(f'{name}: all 5 IDs once, all 125 cells match saved matrices, minimum 10 pt')
 assert len(PdfReader(root / '200-cards.pdf').pages) == 50
+for name in ['literal-free-logo', 'literal-free-no-logo']:
+    with pdfplumber.open(root / f'{name}.pdf') as pdf:
+        page = pdf.pages[0]
+        assert page.extract_text().split().count('FREE') == 1, 'Custom FREE word was lost or duplicated'
+        p = json.loads((root / f'{name}.json').read_text())
+        side = page.width - 72
+        center = (page.width / 2, 36 + 58 + side / 2)
+        cell = side / 3
+        region = page.crop((center[0] - cell/2 + 1, center[1] - cell/2 + 1, center[0] + cell/2 - 1, center[1] + cell/2 - 1))
+        assert (len(region.curves) >= 10) == p['free'], 'Logo presence differs from saved FREE setting'
+        assert all(c['size'] >= 9.99 for c in page.chars), 'Text smaller than 10 pt'
+print('Literal FREE stays a playable word; center logo follows the saved free-space setting.')
 print('Real PDF extraction: positions, IDs, non-full sheets, font minimum and 200-card page count verified.')

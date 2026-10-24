@@ -136,7 +136,7 @@ export function HostSession({
           <p>
             A full row, column, or diagonal counts.{' '}
             {p.free
-              ? 'FREE is already marked.'
+              ? 'The center logo is the free space and is already marked.'
               : 'Every cell needs a called word.'}
           </p>
           <form
@@ -181,8 +181,8 @@ export function HostSession({
                 winning={result.winning}
               />
               <p className="field-help">
-                ✓ = called or FREE. Outlined cells form complete lines. This
-                check does not establish who won first.
+                ✓ = called word or the center logo space. Outlined cells form
+                complete lines. This check does not establish who won first.
               </p>
             </div>
           )}

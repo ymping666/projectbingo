@@ -3,6 +3,13 @@ import fontkit from '@pdf-lib/fontkit';
 import type { Project } from './model';
 import { withBase } from './url';
 import { config } from './config';
+import { cardHeader, cardAllowance, printPalettes } from './card-art';
+import {
+  drawBrandMark,
+  drawCardHeading,
+  drawCardFrame,
+  pdfColor,
+} from './pdf-art';
 export type ExportResult = {
   bytes: Uint8Array;
   cardPages: number;
@@ -103,8 +110,9 @@ function centered(
   width: number,
   height: number,
   max = 17,
+  inset = 12,
 ) {
-  const { lines, size } = fit(text, font, width - 12, height - 6, max);
+  const { lines, size } = fit(text, font, width - inset, height - 6, max);
   const start = y + height / 2 + (lines.length - 1) * size * 0.6 - size * 0.35;
   lines.forEach((line, i) =>
     page.drawText(line, {
@@ -150,14 +158,10 @@ export async function exportPdf(
     rows = p.print.perPage === 1 ? 1 : 2;
   const areaW = (pw - margin * 2 - gap * (cols - 1)) / cols,
     areaH = (ph - margin * 2 - 16 - gap * (rows - 1)) / rows;
-  const side = Math.min(areaW, areaH - 62);
+  const side = Math.min(areaW, areaH - cardAllowance);
   const wordMap = new Map(p.words.map((w) => [w.id, w.text]));
-  const accent =
-    p.print.theme === 'sage'
-      ? rgb(0.86, 0.92, 0.87)
-      : p.print.theme === 'plum'
-        ? rgb(0.92, 0.87, 0.95)
-        : rgb(0.95, 0.95, 0.95);
+  const palette = printPalettes[p.print.theme];
+  const accent = pdfColor(palette.light);
   let page: PDFPage | undefined;
   const cardPages = Math.ceil(p.cards.length / p.print.perPage);
   for (let i = 0; i < p.cards.length; i++) {
@@ -173,10 +177,11 @@ export async function exportPdf(
       row = Math.floor(slot / cols),
       x = margin + column * (areaW + gap) + (areaW - side) / 2,
       top = ph - margin - row * (areaH + gap);
-    centered(page!, font, p.title, x, top - 32, side, 32, 16);
-    centered(page!, font, `Card ${p.cards[i].id}`, x, top - 51, side, 19, 10);
+    drawCardFrame(page!, x, top, side, p.print.theme);
+    centered(page!, font, p.title, x + 8, top - 32, side - 16, 32, 16);
+    drawCardHeading(page!, font, x, top, side, p.print.theme);
     const cell = side / p.size,
-      gridTop = top - 60;
+      gridTop = top - cardHeader;
     for (let j = 0; j < p.size ** 2; j++) {
       const c = p.cards[i].cells[j],
         cx = x + (j % p.size) * cell,
@@ -187,20 +192,31 @@ export async function exportPdf(
         width: cell,
         height: cell,
         color: c.kind === 'free' ? accent : rgb(1, 1, 1),
-        borderColor: ink,
+        borderColor: pdfColor(palette.line),
         borderWidth: 0.6,
       });
       const people = p.mode === 'people' && c.kind !== 'free';
-      centered(
-        page!,
-        font,
-        c.kind === 'free' ? 'FREE' : wordMap.get(c.wordId)!,
-        cx,
-        cy + (people ? cell * 0.32 : 0),
-        cell,
-        people ? cell * 0.68 : cell,
-        p.size === 3 ? 19 : 16,
-      );
+      if (c.kind === 'free') {
+        const mark = Math.min(44, cell * 0.52);
+        drawBrandMark(
+          page!,
+          cx + (cell - mark) / 2,
+          cy + (cell - mark) / 2,
+          mark,
+          p.print.theme === 'ink',
+        );
+      } else
+        centered(
+          page!,
+          font,
+          wordMap.get(c.wordId)!,
+          cx,
+          cy + (people ? cell * 0.32 : 0),
+          cell,
+          people ? cell * 0.68 : cell,
+          p.size === 3 ? 19 : 16,
+          8,
+        );
       if (people) {
         page!.drawLine({
           start: { x: cx + 9, y: cy + cell * 0.16 },
@@ -217,6 +233,21 @@ export async function exportPdf(
         });
       }
     }
+    page!.drawText(`Card ${p.cards[i].id}`, {
+      x,
+      y: gridTop - side - 13,
+      size: 10,
+      font,
+      color: ink,
+    });
+    const legend = p.free ? 'Logo starts marked' : 'Play for a line';
+    page!.drawText(legend, {
+      x: x + side - font.widthOfTextAtSize(legend, 10),
+      y: gridTop - side - 13,
+      size: 10,
+      font,
+      color: ink,
+    });
     progress(Math.round(((i + 1) / p.cards.length) * 90));
     if (i % 8 === 7) await breathe();
   }
@@ -287,7 +318,7 @@ export async function exportPdf(
               : p.templateId === 'music-bingo'
                 ? 'Play songs in your own music player. Agree whether a short clip or the full song counts. Players mark a song title only after hearing it. Record each played title on the activity checklist. The website does not play music, import playlists or recognize songs.'
                 : 'Observe events or items during the agreed activity. Mark a matching entry only when it happens. Agree on what counts before play. The website does not detect real-world events.',
-            `Give each player a card. ${p.free ? 'Mark the center FREE space at the start.' : 'There is no FREE space.'}`,
+            `Give each player a card. ${p.free ? 'The center logo is your free space and starts marked.' : 'There is no free center space.'}`,
             'A full row, column or diagonal is a line. Ask the organizer to confirm a win manually. The web caller and checker do not verify these observations or personal conditions.',
             'Save the project JSON if you need the same layouts again. Print at Actual size / 100%. Use one card per sheet for generous handwriting room.',
           ]
@@ -296,7 +327,7 @@ export async function exportPdf(
             `Project ${p.id}. These instructions belong to this exact set of ${p.cards.length} cards.`,
             '1. Give every player a card and something to mark it with. Keep the full card ID visible.',
             '2. Open this project in the web host, or call words from the printed list in a random order. Call each word only once per round.',
-            `3. Players mark matching words. ${p.free ? 'The center FREE space is already marked.' : 'Every space needs a matching called word.'}`,
+            `3. Players mark matching words. ${p.free ? 'The center logo is your free space and is already marked.' : 'Every space needs a matching called word.'}`,
             '4. A complete horizontal row, vertical column, or either full diagonal satisfies the Bingo rule. No full-card rule is used.',
             '5. A player who has a line can call Bingo. Enter their full card ID in the web host to check the marked cells and completed lines.',
             'Web checks use only the calls recorded in the current web round. A manual paper call is not recorded automatically. Meeting the line rule does not prove who was first, and multiple players can win together.',

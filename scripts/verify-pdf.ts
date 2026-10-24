@@ -77,6 +77,27 @@ await assert.rejects(() => exportPdf(missing, true, font), /cannot display/);
 const overflow = structuredClone(latin);
 overflow.words.forEach((w) => (w.text = 'W'.repeat(80)));
 await assert.rejects(() => exportPdf(overflow, false, font), /10 pt/);
+// The printed logo must not replace an ordinary custom word called FREE.
+for (const free of [true, false]) {
+  const project = generate(
+    {
+      ...templateDraft(food),
+      size: 3,
+      free,
+      count: 1,
+      text:
+        'FREE\nApple\nBanana\nPear\nGrape\nPeach\nPlum\nKiwi' +
+        (free ? '' : '\nMango'),
+    },
+    { paper: 'A4', perPage: 1, theme: 'ink' },
+  );
+  const name = `literal-free-${free ? 'logo' : 'no-logo'}`;
+  await writeFile(
+    `output/pdf/${name}.pdf`,
+    (await exportPdf(project, false, font)).bytes,
+  );
+  await writeFile(`output/pdf/${name}.json`, JSON.stringify(project));
+}
 console.log(
   `40-card A4 game pack: ${pack.cardPages} player + ${pack.extraPages} extra pages. Latin punctuation exports; missing glyphs and overflow reject clearly.`,
 );

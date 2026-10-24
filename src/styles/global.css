@@ -2169,6 +2169,120 @@ details select {
   padding: 0;
 }
 
+/* Printed-card styling: keep the play area clean and put the fun in the frame. */
+.bingo-card {
+  --card-dark: #303633;
+  --card-light: #f4f5f2;
+  --card-line: #8d9690;
+  --card-accent: #fff;
+  border-radius: 10px;
+  border-color: var(--card-line);
+}
+.bingo-card.theme-sage {
+  --card-dark: #355a48;
+  --card-light: #edf3e6;
+  --card-line: #9cac96;
+  --card-accent: #dce9bc;
+  background: linear-gradient(to bottom, var(--card-light) 0 96px, white 96px);
+}
+.bingo-card.theme-plum {
+  --card-dark: #674b70;
+  --card-light: #f5edf5;
+  --card-line: #b5a4b8;
+  --card-accent: #ecd5df;
+  background: linear-gradient(to bottom, var(--card-light) 0 96px, white 96px);
+}
+.bingo-card .card-title {
+  font-family: Lato, Arial, sans-serif;
+  font-size: 20px;
+  letter-spacing: -0.4px;
+  color: var(--card-dark);
+  margin-bottom: 13px;
+}
+.bingo-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0;
+  margin-bottom: 15px;
+  letter-spacing: 0;
+  color: var(--card-dark, #303633);
+}
+.bingo-heading > span {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border: 1px solid var(--card-dark, #303633);
+  border-radius: 50%;
+  font-family: Lato, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  background: var(--card-accent, white);
+}
+.theme-sage .bingo-heading > span:nth-child(odd),
+.theme-plum .bingo-heading > span:nth-child(odd) {
+  background: var(--card-dark);
+  color: white;
+}
+.theme-plum .bingo-heading > span:nth-child(2) {
+  background: #eed3df;
+}
+.theme-plum .bingo-heading > span:nth-child(3) {
+  background: #e2ebc7;
+  color: var(--card-dark);
+}
+.theme-plum .bingo-heading > span:nth-child(4) {
+  background: #f4dfbd;
+}
+.theme-sage .bingo-heading::before,
+.theme-sage .bingo-heading::after,
+.theme-plum .bingo-heading::before,
+.theme-plum .bingo-heading::after {
+  content: '✧';
+  font-size: 21px;
+  color: var(--card-dark);
+  margin: 0 4px;
+}
+.bingo-card .bingo-grid,
+.bingo-card .bingo-cell {
+  border-color: var(--card-line);
+}
+.bingo-card .bingo-cell.free {
+  background: var(--card-light);
+}
+.bingo-card .bingo-cell.free.winning {
+  background: #eee7f5;
+}
+.center-logo {
+  display: block;
+  width: 52%;
+  max-width: 44px;
+  aspect-ratio: 1;
+}
+.card-brand-mark {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.card-center-note {
+  font-size: 9px;
+  text-align: center;
+  line-height: 1.5;
+  color: #697466;
+  margin-top: 9px;
+}
+.blank-center-logo {
+  display: block;
+  width: 52%;
+  max-width: 56px;
+  aspect-ratio: 1;
+}
+.blank-sheet .bingo-heading {
+  margin-top: 18px;
+}
+
 /* Keep the editing surface quiet; choices belong to the page, not an OS menu. */
 .workspace {
   border-radius: 20px;

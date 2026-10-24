@@ -3,6 +3,7 @@ import type { BlankOptions } from '../lib/blank';
 import { download } from './shared';
 import { track } from '../lib/analytics';
 import { ChoiceGroup } from './ChoiceGroup';
+import { BrandMark, BingoHeading } from './BrandMark';
 export default function BlankCards() {
   const [options, setOptions] = useState<BlankOptions>({
     size: 3,
@@ -99,18 +100,32 @@ export default function BlankCards() {
       >
         <h2>Blank Bingo</h2>
         <p>Name: ____________________</p>
+        <BingoHeading />
         <div
           className="blank-grid"
           style={{ gridTemplateColumns: `repeat(${options.size},1fr)` }}
         >
           {Array.from({ length: options.size ** 2 }, (_, i) => (
             <div key={i}>
-              {options.free && i === Math.floor(options.size ** 2 / 2)
-                ? 'FREE'
-                : ''}
+              {options.free && i === Math.floor(options.size ** 2 / 2) ? (
+                <span
+                  className="blank-center-logo"
+                  role="img"
+                  aria-label="Bingo Card Kit logo: free center space, already marked"
+                >
+                  <BrandMark mono />
+                </span>
+              ) : (
+                ''
+              )}
             </div>
           ))}
         </div>
+        {options.free && (
+          <p className="card-center-note">
+            Center logo = free space, already marked.
+          </p>
+        )}
         <small>
           Bingo Card Kit · Handwritten card
           <br />

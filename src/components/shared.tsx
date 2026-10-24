@@ -10,6 +10,7 @@ import { Download, Upload, Check, AlertCircle } from 'lucide-react';
 import { config } from '../lib/config';
 import { track, projectParameters } from '../lib/analytics';
 import { longestWordEm, needsWordBreak } from '../lib/card-text';
+import { BrandMark, BingoHeading } from './BrandMark';
 export function download(data: BlobPart, name: string, type: string) {
   const url = URL.createObjectURL(new Blob([data], { type }));
   const a = document.createElement('a');
@@ -148,9 +149,7 @@ export function CardView({
       className={`bingo-card theme-${project.print.theme} mode-${project.mode || 'called'}`}
     >
       <div className="card-title">{project.title}</div>
-      <div className="bingo-heading" aria-hidden="true">
-        B I N G O
-      </div>
+      <BingoHeading />
       <div
         className="bingo-grid"
         style={
@@ -167,10 +166,13 @@ export function CardView({
             className={`bingo-cell ${c.kind === 'free' ? 'free' : ''} ${hits?.[i] ? 'hit' : ''} ${winning?.has(i) ? 'winning' : ''}`}
           >
             {c.kind === 'free' ? (
-              <>
-                <span className="free-star">✳</span>
-                <span>FREE</span>
-              </>
+              <span
+                className="center-logo"
+                role="img"
+                aria-label="Bingo Card Kit logo: free center space, already marked"
+              >
+                <BrandMark mono={project.print.theme === 'ink'} />
+              </span>
             ) : (
               <span
                 className={`cell-word ${needsWordBreak(words.get(c.wordId)!) ? 'break-long' : ''}`}
@@ -194,6 +196,11 @@ export function CardView({
           </div>
         ))}
       </div>
+      {project.free && (
+        <div className="card-center-note">
+          Center logo = free space, already marked.
+        </div>
+      )}
       <div className="card-footer">
         <span>{config.name}</span>
         <span>{card.id}</span>

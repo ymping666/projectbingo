@@ -397,9 +397,17 @@ export default function Editor({ initial }: { initial: Project }) {
                 disabled={!ready}
                 onChange={(theme) => print('theme', theme as Print['theme'])}
                 options={[
-                  { value: 'ink', label: 'Ink saver' },
-                  { value: 'sage', label: 'Sage green' },
-                  { value: 'plum', label: 'Soft plum' },
+                  { value: 'ink', label: 'Ink saver', detail: 'Black & white' },
+                  {
+                    value: 'sage',
+                    label: 'Sage green',
+                    detail: 'Garden party',
+                  },
+                  {
+                    value: 'plum',
+                    label: 'Soft plum',
+                    detail: 'A little confetti',
+                  },
                 ]}
               />
             </details>
@@ -457,7 +465,8 @@ export default function Editor({ initial }: { initial: Project }) {
               <span className="status-dot" /> {p.cards.length} unique layouts
             </span>
             <span>
-              {p.size} × {p.size} · {p.free ? 'FREE center' : 'No free space'}
+              {p.size} × {p.size} ·{' '}
+              {p.free ? 'Logo free space' : 'No free space'}
             </span>
           </div>
           <div className="paper-stack">

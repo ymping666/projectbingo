@@ -21,7 +21,9 @@ python scripts/inspect-pdf.py
 
 The Python check needs pdfplumber and pypdf. It verifies actual PDF cells/IDs, page sizes and a 10 pt minimum. Render with Poppler for visual inspection. DOM tests cover real PDF generation, both dirty-download branches, matching snapshots, hosting/undo/checking, old JSON import, restoration, first-call events and failed local storage. Browser viewport checks do not establish real-phone or physical-printer acceptance.
 
-PDF code loads on export. Lato is embedded from `public/fonts/` (OFL license included). Long text wraps and adjusts to at least 10 pt; unsupported glyphs or overflow stop export with an explanation. Complex scripts and emoji are outside this edition. `npm run samples` rebuilds the three committed example game packs using this same engine; their fixed example IDs match the corresponding template-page preview.
+PDF code loads on export. Lato is embedded from `public/fonts/` (OFL license included). Long text wraps and adjusts to at least 10 pt; unsupported glyphs or overflow stop export with an explanation. Complex scripts and emoji are outside this edition. `npm run samples` rebuilds the committed example game packs using this same engine; their fixed example IDs match the corresponding template-page preview.
+
+The free center displays the existing brand mark as vectors rather than the word FREE. It still starts marked; an ordinary custom word FREE remains a called entry. Ink saver stays monochrome. Sage and plum add decorative Bingo headers while keeping word cells white. These are print-only changes: stored matrices, card IDs, free-space settings and calling rounds are preserved. Browser previews and blank sheets use the same logo geometry.
 
 ## Builds and publishing
 
