@@ -1,7 +1,13 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { render, screen, waitFor, cleanup } from '@testing-library/react';
+import {
+  render,
+  screen,
+  waitFor,
+  cleanup,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PDFDocument } from 'pdf-lib';
 import Editor from './Editor';
@@ -32,6 +38,12 @@ const initial = () =>
   generate(templateDraft(food), { paper: 'A4', perPage: 2, theme: 'ink' });
 const stored = () => JSON.parse(localStorage.getItem(STORAGE_KEY)!) as Project;
 beforeEach(() => {
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute('open', '');
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute('open');
+  };
   // jsdom's Blob lacks the browser-standard text() method inherited by File.
   if (!Blob.prototype.text)
     Object.defineProperty(Blob.prototype, 'text', {
@@ -62,6 +74,53 @@ afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
+it('searches and filters templates, restores focus, and preserves saved cards until generation', async () => {
+  const user = userEvent.setup();
+  render(<Editor initial={initial()} />);
+  await screen.findByText('Saved on this browser');
+  const before = localStorage.getItem(STORAGE_KEY);
+  const trigger = screen.getByRole('button', { name: /Start with a template/ });
+  await user.click(trigger);
+  const search = screen.getByRole('searchbox', { name: 'Search templates' });
+  expect(document.activeElement).toBe(search);
+  await user.click(
+    within(
+      screen.getByRole('group', { name: 'Template categories' }),
+    ).getByRole('button', { name: 'Activities' }),
+  );
+  expect(
+    within(screen.getByRole('dialog')).queryByRole('button', {
+      name: 'Food Vocabulary',
+    }),
+  ).toBeNull();
+  await user.type(search, 'no matching theme');
+  expect(screen.getByText('No templates found')).toBeTruthy();
+  await user.click(screen.getByRole('button', { name: 'Show all templates' }));
+  await user.type(search, 'music');
+  await user.click(
+    within(screen.getByRole('dialog')).getByRole('button', {
+      name: 'Music',
+    }),
+  );
+  expect(screen.queryByRole('dialog')).toBeNull();
+  expect(document.activeElement).toBe(trigger);
+  expect((screen.getByLabelText('Card title') as HTMLInputElement).value).toBe(
+    'Music Bingo',
+  );
+  expect(localStorage.getItem(STORAGE_KEY)).toBe(before);
+  expect(track).toHaveBeenCalledWith('template_used', {
+    templateId: 'music-bingo',
+    size: 5,
+  });
+  await user.click(trigger);
+  await user.type(
+    screen.getByRole('searchbox', { name: 'Search templates' }),
+    'music',
+  );
+  await user.keyboard('{Escape}');
+  expect(screen.queryByRole('dialog')).toBeNull();
+  expect(document.activeElement).toBe(trigger);
+});
 it('completes 50 words → 40 cards → real A4 pack → hosting → undo → verify → JSON restore/import', async () => {
   const user = userEvent.setup();
   const old = initial();
@@ -81,10 +140,20 @@ it('completes 50 words → 40 cards → real A4 pack → hosting → undo → ve
   expect(p.free).toBe(true);
   const cards = JSON.stringify(p.cards),
     round = JSON.stringify(p.round);
-  await user.selectOptions(screen.getByLabelText('Cards per page'), '4');
+  await user.click(
+    within(screen.getByRole('group', { name: 'Cards per page' })).getByRole(
+      'button',
+      { name: '4' },
+    ),
+  );
   expect(JSON.stringify(stored().cards)).toBe(cards);
   expect(JSON.stringify(stored().round)).toBe(round);
-  await user.selectOptions(screen.getByLabelText('Cards per page'), '2');
+  await user.click(
+    within(screen.getByRole('group', { name: 'Cards per page' })).getByRole(
+      'button',
+      { name: '2' },
+    ),
+  );
   await user.click(screen.getByRole('button', { name: 'Next card' }));
   expect(screen.getByText(p.cards[1].id)).toBeTruthy();
   await user.click(screen.getByRole('button', { name: 'Download game pack' }));
@@ -170,9 +239,13 @@ it('offers both dirty download branches and exports the exact new snapshot, with
   render(<Editor initial={old} />);
   await screen.findByText('Saved on this browser');
   expect(track).not.toHaveBeenCalled();
-  await user.selectOptions(
-    screen.getByLabelText(/Start with a template/),
-    'weather-bingo',
+  await user.click(
+    screen.getByRole('button', { name: /Start with a template/ }),
+  );
+  await user.click(
+    within(screen.getByRole('dialog')).getByRole('button', {
+      name: 'Weather',
+    }),
   );
   expect(screen.getByText('EDITS NOT GENERATED')).toBeTruthy();
   await user.click(screen.getByRole('button', { name: 'Download cards only' }));
@@ -256,8 +329,18 @@ it('keeps existing saved activity byte-for-byte through blank options and downlo
   const original = JSON.stringify(initial());
   localStorage.setItem(STORAGE_KEY, original);
   render(<BlankCards />);
-  await user.selectOptions(screen.getByLabelText('Grid size'), '5');
-  await user.selectOptions(screen.getByLabelText('Paper size'), 'Letter');
+  await user.click(
+    within(screen.getByRole('group', { name: 'Grid size' })).getByRole(
+      'button',
+      { name: '5 × 5' },
+    ),
+  );
+  await user.click(
+    within(screen.getByRole('group', { name: 'Paper size' })).getByRole(
+      'button',
+      { name: 'US Letter' },
+    ),
+  );
   await user.click(screen.getByLabelText('Center FREE space'));
   await user.click(screen.getByRole('button', { name: 'Download blank PDF' }));
   await screen.findByText(/Blank PDF ready/);
@@ -344,9 +427,14 @@ it('generates observed and people presets with matching print flow and no primar
   for (const id of ['office-buzzword-bingo', 'office-icebreaker']) {
     const view = render(<Editor initial={initial()} />);
     await screen.findByText('Saved on this browser');
-    await user.selectOptions(
-      screen.getByLabelText(/Start with a template/),
-      id,
+    await user.click(
+      screen.getByRole('button', { name: /Start with a template/ }),
+    );
+    await user.click(
+      within(screen.getByRole('dialog')).getByRole('button', {
+        name:
+          id === 'office-icebreaker' ? 'Office Icebreaker' : 'Office Buzzword',
+      }),
     );
     const count = screen.getByLabelText('Number of cards');
     await user.clear(count);

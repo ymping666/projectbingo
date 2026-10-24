@@ -23,6 +23,8 @@ import { allPresets as templates, templateDraft } from '../lib/templates';
 import { track, projectParameters, exportErrorCode } from '../lib/analytics';
 import { CardView, ProjectTools, Notice, useProject, download } from './shared';
 import { HostSession } from './Host';
+import TemplatePicker from './TemplatePicker';
+import { ChoiceGroup } from './ChoiceGroup';
 export default function Editor({ initial }: { initial: Project }) {
   const { project, setProject, ready, save } = useProject(initial);
   const p = project!;
@@ -192,28 +194,19 @@ export default function Editor({ initial }: { initial: Project }) {
           <span className="small-pill">TEXT BINGO</span>
         </div>
         <div className="editor-body">
-          <label htmlFor="template">
+          <label htmlFor="template" id="template-label">
             Start with a template{' '}
             <span className="optional">or add your own words</span>
           </label>
-          <select
-            id="template"
-            value={draft.templateId || ''}
-            onChange={(e) => {
-              const t = templates.find((t) => t.id === e.target.value);
+          <TemplatePicker
+            value={draft.templateId}
+            onChange={(t) => {
               if (t) {
                 setDraft(templateDraft(t));
                 track('template_used', { templateId: t.id, size: t.size });
               } else setDraft({ ...draft, templateId: undefined });
             }}
-          >
-            <option value="">Custom word list</option>
-            {templates.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
+          />
           {templates.find((t) => t.id === draft.templateId)?.variants && (
             <fieldset>
               <legend>Alphabet preset (edits only)</legend>
@@ -242,16 +235,25 @@ export default function Editor({ initial }: { initial: Project }) {
               </p>
             </fieldset>
           )}
-          <label htmlFor="mode">Activity rules</label>
-          <select
-            id="mode"
+          <ChoiceGroup
+            label="Activity rules"
             value={draft.mode || 'called'}
-            onChange={(e) => update('mode', e.target.value as Draft['mode'])}
-          >
-            <option value="called">Called words</option>
-            <option value="observed">Observed events</option>
-            <option value="people">Find people (names on paper)</option>
-          </select>
+            onChange={(mode) => update('mode', mode as Draft['mode'])}
+            detailed
+            options={[
+              {
+                value: 'called',
+                label: 'Called words',
+                detail: 'Listen & mark',
+              },
+              {
+                value: 'observed',
+                label: 'Observed events',
+                detail: 'Spot & mark',
+              },
+              { value: 'people', label: 'Find people', detail: 'Meet & write' },
+            ]}
+          />
           <p className="field-help">
             {draft.mode === 'people'
               ? 'Print cards with name lines. Meet people and confirm wins manually; no names are entered here. New people activities start with one card per sheet for handwriting; change Print setup after generating if needed.'
@@ -338,55 +340,44 @@ export default function Editor({ initial }: { initial: Project }) {
               <span>Applies to this card set</span>
             </div>
             <div className="form-row">
-              <div>
-                <label htmlFor="paper">Paper size</label>
-                <select
-                  id="paper"
-                  value={p.print.paper}
-                  disabled={!ready}
-                  onChange={(e) =>
-                    print('paper', e.target.value as Print['paper'])
-                  }
-                >
-                  <option value="A4">A4</option>
-                  <option value="Letter">US Letter</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="per-page">Cards per page</label>
-                <select
-                  id="per-page"
-                  value={p.print.perPage}
-                  disabled={!ready}
-                  onChange={(e) =>
-                    print('perPage', Number(e.target.value) as Print['perPage'])
-                  }
-                >
-                  {[1, 2, 4].map((n) => (
-                    <option key={n} value={n}>
-                      {n} {n === 1 ? 'card' : 'cards'} per page
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <ChoiceGroup
+                label="Paper size"
+                value={p.print.paper}
+                disabled={!ready}
+                onChange={(paper) => print('paper', paper as Print['paper'])}
+                options={[
+                  { value: 'A4', label: 'A4' },
+                  { value: 'Letter', label: 'US Letter' },
+                ]}
+              />
+              <ChoiceGroup
+                label="Cards per page"
+                value={p.print.perPage}
+                disabled={!ready}
+                onChange={(perPage) =>
+                  print('perPage', perPage as Print['perPage'])
+                }
+                options={([1, 2, 4] as const).map((value) => ({
+                  value,
+                  label: String(value),
+                }))}
+              />
             </div>
             <details>
               <summary>
                 <SlidersHorizontal size={14} /> Appearance
               </summary>
-              <label htmlFor="theme">Print color</label>
-              <select
-                id="theme"
+              <ChoiceGroup
+                label="Print color"
                 value={p.print.theme}
                 disabled={!ready}
-                onChange={(e) =>
-                  print('theme', e.target.value as Print['theme'])
-                }
-              >
-                <option value="ink">Ink saver · Black & white</option>
-                <option value="sage">Sage green</option>
-                <option value="plum">Soft plum</option>
-              </select>
+                onChange={(theme) => print('theme', theme as Print['theme'])}
+                options={[
+                  { value: 'ink', label: 'Ink saver' },
+                  { value: 'sage', label: 'Sage green' },
+                  { value: 'plum', label: 'Soft plum' },
+                ]}
+              />
             </details>
           </div>
           <button

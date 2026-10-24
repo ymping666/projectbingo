@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { BlankOptions } from '../lib/blank';
 import { download } from './shared';
 import { track } from '../lib/analytics';
+import { ChoiceGroup } from './ChoiceGroup';
 export default function BlankCards() {
   const [options, setOptions] = useState<BlankOptions>({
     size: 3,
@@ -52,28 +53,26 @@ export default function BlankCards() {
     >
       <div className="blank-options">
         <h2>Make a handwriting sheet</h2>
-        <label htmlFor="blank-grid">Grid size</label>
-        <select
-          id="blank-grid"
+        <ChoiceGroup
+          label="Grid size"
           value={options.size}
-          onChange={(e) =>
-            setOptions({ ...options, size: Number(e.target.value) as 3 | 5 })
-          }
-        >
-          <option value="3">3 × 3</option>
-          <option value="5">5 × 5</option>
-        </select>
-        <label htmlFor="blank-paper">Paper size</label>
-        <select
-          id="blank-paper"
+          onChange={(size) => setOptions({ ...options, size: size as 3 | 5 })}
+          options={[
+            { value: 3, label: '3 × 3' },
+            { value: 5, label: '5 × 5' },
+          ]}
+        />
+        <ChoiceGroup
+          label="Paper size"
           value={options.paper}
-          onChange={(e) =>
-            setOptions({ ...options, paper: e.target.value as 'A4' | 'Letter' })
+          onChange={(paper) =>
+            setOptions({ ...options, paper: paper as 'A4' | 'Letter' })
           }
-        >
-          <option>A4</option>
-          <option value="Letter">US Letter</option>
-        </select>
+          options={[
+            { value: 'A4', label: 'A4' },
+            { value: 'Letter', label: 'US Letter' },
+          ]}
+        />
         <label className="check-label">
           <input
             type="checkbox"
