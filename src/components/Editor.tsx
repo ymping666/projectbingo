@@ -10,6 +10,8 @@ import {
   Printer,
   ShieldCheck,
   ExternalLink,
+  Type,
+  List,
 } from 'lucide-react';
 import {
   normalize,
@@ -262,29 +264,51 @@ export default function Editor({ initial }: { initial: Project }) {
                 : 'Call words from the saved activity and check card IDs.'}
           </p>
           <label htmlFor="title">Card title</label>
-          <input
-            id="title"
-            maxLength={80}
-            value={draft.title}
-            onChange={(e) => update('title', e.target.value)}
-          />
-          <div className="label-row">
-            <label htmlFor="words">Your words</label>
-            <span className="word-count">{count} / 500 words</span>
+          <div className="title-input-shell">
+            <span className="title-input-mark" aria-hidden="true">
+              <Type size={19} />
+            </span>
+            <input
+              id="title"
+              maxLength={80}
+              value={draft.title}
+              placeholder="Give your game a name"
+              onChange={(e) => update('title', e.target.value)}
+            />
+            <span className="title-input-count" aria-hidden="true">
+              {draft.title.length}
+              <span> / 80</span>
+            </span>
           </div>
-          <textarea
-            id="words"
-            rows={7}
-            value={draft.text}
-            onChange={(e) => {
-              update('text', e.target.value);
-              update('templateId', undefined);
-            }}
-            spellCheck={false}
-            aria-describedby="word-help"
-          />
-          <p className="field-help" id="word-help">
-            One word or phrase per line. Up to 80 characters each.
+          <label htmlFor="words">Your words</label>
+          <div className="word-editor">
+            <div className="word-editor-toolbar" aria-hidden="true">
+              <List size={15} />
+              <span>YOUR WORD BANK</span>
+              <small>ONE ENTRY PER LINE</small>
+            </div>
+            <textarea
+              id="words"
+              rows={8}
+              value={draft.text}
+              placeholder={'Apple\nBanana\nOrange\nAdd your own words…'}
+              onChange={(e) => {
+                update('text', e.target.value);
+                update('templateId', undefined);
+              }}
+              spellCheck={false}
+              aria-describedby="word-help word-format"
+            />
+            <div className="word-editor-footer">
+              <span className="word-editor-count">
+                <i aria-hidden="true" />
+                {count} <span>/ 500 entries</span>
+              </span>
+              <span id="word-help">Up to 80 characters each</span>
+            </div>
+          </div>
+          <p className="field-help word-editor-help" id="word-format">
+            Paste a list or type one word or phrase per line.
             {duplicates > 0 &&
               ` ${duplicates} duplicate ${duplicates === 1 ? 'entry' : 'entries'} will be removed.`}
           </p>
