@@ -3,10 +3,20 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { loadEnv } from 'vite';
 // Public deployment values only; never put tokens or credentials in this file.
 const analyticsDefaults = JSON.parse(
-  readFileSync(new URL('../config/analytics.production.json', import.meta.url), 'utf8'),
+  readFileSync(
+    new URL('../config/analytics.production.json', import.meta.url),
+    'utf8',
+  ),
+);
+const feedbackDefaults = JSON.parse(
+  readFileSync(
+    new URL('../config/feedback.production.json', import.meta.url),
+    'utf8',
+  ),
 );
 const supplied = {
   ...analyticsDefaults,
+  ...feedbackDefaults,
   ...loadEnv('production', process.cwd(), ''),
   ...process.env,
 };

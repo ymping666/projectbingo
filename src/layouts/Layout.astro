@@ -5,6 +5,9 @@ import { config } from '../lib/config';
 import { deployment, productionOrigin } from '../lib/deployment';
 import { analyticsConfigured } from '../lib/analytics';
 import AnalyticsConsent from '../components/AnalyticsConsent';
+import Feedback from '../components/Feedback.astro';
+import { feedbackFormUrl } from '../lib/feedback';
+const feedbackLink = feedbackFormUrl(config.feedbackFormUrl);
 const { title, description, noindex = false } = Astro.props;
 const canonical =
   deployment.indexable && !noindex
@@ -143,6 +146,19 @@ const path = routePath(Astro.url.pathname);
         ><a href={withBase('/about/')}>About</a><a href={withBase('/privacy/')}
           >Privacy</a
         >{
+          feedbackLink && (
+            <a
+              href={feedbackLink}
+              data-feedback-open
+              aria-haspopup="dialog"
+              aria-controls="feedback-dialog"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Feedback
+            </a>
+          )
+        }{
           config.contactEmail && (
             <a href={`mailto:${config.contactEmail}`}>Contact</a>
           )
@@ -150,6 +166,7 @@ const path = routePath(Astro.url.pathname);
         {analyticsConfigured && <AnalyticsConsent client:load />}
       </div><p>Made for shared tables, classrooms, and good company.</p>
     </footer>
+    <Feedback />
     <script>
       import { track } from '../lib/analytics';
       document.addEventListener('click', (event) => {

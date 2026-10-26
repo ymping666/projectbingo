@@ -9,6 +9,9 @@ const directory = preview ? 'dist-preview' : 'dist';
 const base = preview ? '/projectbingo/' : '/';
 const indexable = !preview && process.env.INDEXABLE_BUILD !== 'false';
 const origin = 'https://bingocardkit.com';
+const feedbackSettings = JSON.parse(
+  await readFile('config/feedback.production.json', 'utf8'),
+);
 let pages = 0;
 async function inspect(dir: string) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -22,6 +25,18 @@ async function inspect(dir: string) {
     pages++;
     assert(html.includes('Bingo Card Kit'));
     assert(!html.includes('Bingo Print Kit'));
+    assert(
+      html.includes(`href="${feedbackSettings.PUBLIC_FEEDBACK_FORM_URL}"`),
+      `Missing feedback responder link: ${file}`,
+    );
+    assert(
+      html.includes('data-feedback-open'),
+      `Missing feedback entry: ${file}`,
+    );
+    assert(
+      !html.includes('data-recipient='),
+      `Public feedback receiving address: ${file}`,
+    );
     assert.equal((html.match(/<h1[ >]/g) || []).length, 1, file);
     const relative = path.relative(directory, file).replaceAll('\\', '/');
     const blocked =
