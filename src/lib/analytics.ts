@@ -72,6 +72,32 @@ export function safePageLocation(pathname: string) {
   const path = pathname.split(/[?#]/)[0];
   return productionOrigin + (routes.has(path) ? path : '/404/');
 }
+// Only fixed public origins are reported; never transmit the original referrer.
+export function safeReferrer(referrer: string): string {
+  try {
+    const url = new URL(referrer);
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return '';
+    const host = url.hostname.toLowerCase();
+    if (['google.com', 'www.google.com', 'google.co.uk', 'www.google.co.uk',
+      'google.ca', 'www.google.ca', 'google.com.au', 'www.google.com.au'].includes(host)) {
+      if (url.pathname === '/search') return 'https://www.google.com/search';
+      return url.pathname === '/' ? 'https://www.google.com/' : '';
+    }
+    const sources: Record<string, string> = {
+      'reddit.com': 'https://www.reddit.com/',
+      'www.reddit.com': 'https://www.reddit.com/',
+      'old.reddit.com': 'https://www.reddit.com/',
+      'bing.com': 'https://www.bing.com/',
+      'www.bing.com': 'https://www.bing.com/',
+      'pinterest.com': 'https://www.pinterest.com/',
+      'www.pinterest.com': 'https://www.pinterest.com/',
+      't.co': 'https://t.co/',
+    };
+    return sources[host] ?? '';
+  } catch {
+    return '';
+  }
+}
 export function createTracker(
   emit: (event: string, payload: SafePayload) => void,
   enabled: () => boolean,
@@ -164,6 +190,7 @@ export async function setAnalyticsConsent(allow: boolean): Promise<boolean> {
     return active;
   }
   w.dataLayer = w.dataLayer || [];
+  const referrer = safeReferrer(document.referrer);
   w.gtag = function () {
     w.dataLayer!.push(arguments);
   };
@@ -177,7 +204,7 @@ export async function setAnalyticsConsent(allow: boolean): Promise<boolean> {
   w.gtag('set', {
     page_location: safePageLocation(location.pathname),
     page_title: 'Bingo Card Kit',
-    page_referrer: '',
+    page_referrer: referrer,
     ads_data_redaction: true,
     url_passthrough: false,
   });
@@ -186,10 +213,9 @@ export async function setAnalyticsConsent(allow: boolean): Promise<boolean> {
     send_page_view: false,
     allow_google_signals: false,
     allow_ad_personalization_signals: false,
-    ignore_referrer: true,
     page_location: safePageLocation(location.pathname),
     page_title: 'Bingo Card Kit',
-    page_referrer: '',
+    page_referrer: referrer,
     cookie_prefix: 'bck',
     cookie_domain: 'none',
     cookie_flags: 'SameSite=Lax;Secure',
@@ -211,7 +237,7 @@ export async function setAnalyticsConsent(allow: boolean): Promise<boolean> {
         w.gtag?.('event', 'page_view', {
           page_location: safePageLocation(location.pathname),
           page_title: 'Bingo Card Kit',
-          page_referrer: '',
+          page_referrer: referrer,
         });
       resolve(active);
     };

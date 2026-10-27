@@ -5,7 +5,17 @@ import {
   safePageLocation,
   analyticsConfigured,
   exportErrorCode,
+  safeReferrer,
 } from './analytics';
+it('classifies only known referrers without sending their paths, queries or fragments', () => {
+  expect(safeReferrer('https://www.google.com/search?q=private#secret')).toBe('https://www.google.com/search');
+  expect(safeReferrer('https://www.google.com/')).toBe('https://www.google.com/');
+  expect(safeReferrer('https://www.reddit.com/r/example/comments/private?word=secret')).toBe('https://www.reddit.com/');
+  expect(safeReferrer('https://www.reddit.com.evil.example/private')).toBe('');
+  expect(safeReferrer('https://bingocardkit.com/?private=secret')).toBe('');
+  expect(safeReferrer('https://www.google.com/mail/private')).toBe('');
+  expect(safeReferrer('not a URL')).toBe('');
+});
 it('sends only whitelisted settings, never imported IDs, content or arbitrary errors', () => {
   const input = {
     templateId: 'private title',

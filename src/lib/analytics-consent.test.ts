@@ -94,3 +94,21 @@ it('keeps Google disabled when the manual-only confirmation or real ID is absent
   expect(await a.setAnalyticsConsent(true)).toBe(false);
   expect(document.head.append).not.toHaveBeenCalled();
 });
+
+it('sends a fixed referrer for recognized sources and never the original URL', async () => {
+  vi.spyOn(document, 'referrer', 'get').mockReturnValue(
+    'https://www.reddit.com/r/example/comments/private?words=secret#private',
+  );
+  const a = await import('./analytics');
+  const loading = a.setAnalyticsConsent(true);
+  const script = vi.mocked(document.head.append).mock.calls[0][0] as HTMLScriptElement;
+  script.dispatchEvent(new Event('load'));
+  expect(await loading).toBe(true);
+  const w = window as unknown as Window & { dataLayer: IArguments[] };
+  const calls = w.dataLayer.map((args) => Array.from(args));
+  const json = JSON.stringify(calls);
+  expect(json).toContain('https://www.reddit.com/');
+  expect(json).not.toContain('/r/example');
+  expect(json).not.toContain('secret');
+  expect(json).not.toContain('ignore_referrer');
+});
