@@ -7,6 +7,7 @@ export type Template = {
   size: 3 | 5;
   category: string;
   description: string;
+  seoTitle?: string;
   tip: string;
   words: string[];
   mode?: GameMode;
@@ -111,11 +112,12 @@ export const templates: Template[] = [
   {
     id: 'christmas-bingo',
     name: 'Christmas Words',
+    seoTitle: 'Christmas Bingo Words and Printable Cards',
     icon: '✳',
     size: 5,
     category: 'Celebrations',
     description:
-      'A festive collection of 36 seasonal words for a cozy group activity.',
+      'Explore 36 Christmas Bingo words, customize a printable word card set, or download a sample PDF with a caller list for your holiday gathering.',
     tip: 'Use this as a quiet table activity or a group game. Sage is a gentle optional accent, while the default ink theme saves color ink.',
     words: list(
       'Christmas|Tree|Star|Bauble|Tinsel|Garland|Wreath|Candle|Stocking|Gift|Ribbon|Wrapping paper|Bell|Snowflake|Snowman|Snow|Sleigh|Reindeer|Santa|Elf|Chimney|Fireplace|Gingerbread|Candy cane|Cookie|Hot chocolate|Mistletoe|Holly|Pine cone|Carol|Choir|Angel|Ornament|Advent calendar|Christmas Eve|Christmas dinner',

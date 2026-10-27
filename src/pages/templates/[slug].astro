@@ -17,7 +17,7 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
 );
 ---
 
-<Layout title={`${t.name} Bingo cards`} description={t.description}
+<Layout title={t.seoTitle || `${t.name} Bingo cards`} description={t.description}
   ><div class="breadcrumbs">
     <a href={withBase('/templates/')}>All templates</a><span>/</span>{t.name}
   </div><section class="template-detail">
@@ -34,7 +34,8 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
         href={withBase(`/?template=${t.id}`)}
         data-template-use={t.id}
         data-template-size={t.size}>Use this template <span>↗</span></a
-      ><h2>At your next gathering</h2><p>{t.tip}</p><p>
+      >{t.id === 'christmas-bingo' && <p><a href="#word-list">See all {t.words.length} Christmas Bingo words</a></p>}
+      <h2>At your next gathering</h2><p>{t.tip}</p><p>
         {
           t.mode === 'observed'
             ? 'Print different layouts, then mark matching events or phrases as you observe them. Agree on matches and confirm lines manually. No random website calling or automatic event verification is needed.'
@@ -245,11 +246,11 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
       </section>
     )
   }
-  <section class="word-pool">
+  <section class="word-pool" id="word-list">
     <div class="section-title">
       <div>
         <div class="section-eyebrow">WHAT’S IN THE GAME</div><h2>
-          The complete word list
+          {t.id === 'christmas-bingo' ? 'Christmas Bingo word list' : 'The complete word list'}
         </h2>
       </div><span>{t.words.length} distinct entries</span>
     </div><ul>{t.words.map((w: string) => <li>{w}</li>)}</ul>
