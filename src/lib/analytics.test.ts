@@ -7,6 +7,7 @@ import {
   exportErrorCode,
   safeReferrer,
 } from './analytics';
+import { classroomDownloadEvents, foodClassroomTemplate } from './food-classroom';
 it('classifies only known referrers without sending their paths, queries or fragments', () => {
   expect(safeReferrer('https://www.google.com/search?q=private#secret')).toBe('https://www.google.com/search');
   expect(safeReferrer('https://www.google.com/')).toBe('https://www.google.com/');
@@ -92,4 +93,21 @@ it('contains measurement failures and maps errors to fixed categories', () => {
     'text_overflow',
   );
   expect(exportErrorCode(new Error('private title'))).toBe('export_failed');
+});
+
+it('keeps classroom pack and individual downloads distinct', () => {
+  const emit = vi.fn();
+  const track = createTracker(emit, () => true, () => '/templates/food-vocabulary-bingo/');
+  for (const event of Object.values(classroomDownloadEvents))
+    track(event, { templateId: foodClassroomTemplate, paper: 'Letter' });
+  expect(emit.mock.calls.map(([event]) => event)).toEqual([
+    'classroom_pack_download',
+    'classroom_bingo_download',
+    'classroom_flashcards_download',
+    'classroom_matching_download',
+  ]);
+  expect(emit.mock.calls[0][1]).toMatchObject({
+    template_id: foodClassroomTemplate,
+    paper: 'Letter',
+  });
 });

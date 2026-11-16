@@ -1,0 +1,479 @@
+---
+import {
+  classroomCardCount,
+  classroomFilename,
+  classroomPapers,
+  foodClassroomTemplate,
+  type ClassroomDownload,
+} from '../lib/food-classroom';
+import { withBase } from '../lib/url';
+import { ArrowDown, ArrowUpRight, Download, Printer } from 'lucide-react';
+import apple from '../../assets/openmoji-food/1F34E.png?url';
+import strawberry from '../../assets/openmoji-food/1F353.png?url';
+import carrot from '../../assets/openmoji-food/1F955.png?url';
+const { templateSize } = Astro.props as { templateSize: 3 | 5 };
+
+const cardWords = ['Cucumber', 'Pizza', 'Apple', 'Pear', 'FREE', 'Ice cream', 'Carrot', 'Egg', 'Bread'];
+
+const activities = [
+  {
+    part: 'bingo',
+    title: 'Classroom Bingo',
+    details: `${classroomCardCount} different 3 × 3 boards and a teacher call sheet. Call a word, then listen and mark.`,
+  },
+  {
+    part: 'flashcards',
+    title: 'Picture flashcards',
+    details: '16 illustrated word cards to introduce the vocabulary and practice saying it aloud.',
+  },
+  {
+    part: 'matching',
+    title: 'Matching game',
+    details: 'Cut out 16 pictures and 16 word cards, then have students match each pair.',
+  },
+] satisfies { part: ClassroomDownload; title: string; details: string }[];
+
+const pdf = (
+  part: ClassroomDownload,
+  paper: (typeof classroomPapers)[number],
+) => withBase(`/samples/${classroomFilename(part, paper)}`);
+---
+
+<header class="pack-hero">
+  <div class="hero-copy">
+    <p class="pack-kicker">Printable ESL classroom pack</p>
+    <h1>Food Vocabulary<br /><em>Bingo &amp; Activities</em></h1>
+    <p class="pack-intro">
+      Teach 16 everyday food words with picture cards, practice listening
+      with Bingo, then match each picture to its word.
+    </p>
+    <div class="hero-actions">
+      <a class="hero-download" href="#classroom-pack">
+        Get the classroom pack <ArrowDown size={17} aria-hidden="true" />
+      </a>
+      <a
+        class="hero-customize"
+        href={withBase(`/?template=${foodClassroomTemplate}`)}
+        data-template-use={foodClassroomTemplate}
+        data-template-size={templateSize}
+      >
+        Customize Bingo <ArrowUpRight size={16} aria-hidden="true" />
+      </a>
+    </div>
+    <p class="hero-formats">A4 and US Letter · Black-and-white printing</p>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="hero-board">
+      <span class="paper-title">Food Vocabulary Bingo</span>
+      <div class="paper-letters">
+        {'BINGO'.split('').map((letter) => <span>{letter}</span>)}
+      </div>
+      <div class="paper-grid">
+        {cardWords.map((word) => <span class:list={{ free: word === 'FREE' }}>{word}</span>)}
+      </div>
+    </div>
+    <div class="hero-flashcard">
+      <img src={apple} width="100" height="100" alt="" />
+      <span>Apple</span>
+    </div>
+  </div>
+</header>
+
+<section class="classroom-pack" id="classroom-pack" aria-labelledby="classroom-pack-title">
+  <div class="pack-download-panel">
+    <div>
+      <h2 id="classroom-pack-title">Download the full classroom pack</h2>
+      <p>All three activities and the teacher call sheet in one 19-page PDF.</p>
+    </div>
+    <div class="pack-downloads">
+      {classroomPapers.map((paper) => (
+        <a
+          href={pdf('pack', paper)}
+          download
+          data-classroom-download="pack"
+          data-classroom-paper={paper.id}
+          aria-label={`Download full classroom pack (${paper.label})`}
+        >
+          <Download size={16} aria-hidden="true" />
+          {paper.label} PDF
+        </a>
+      ))}
+    </div>
+    <p class="print-note">
+      <Printer size={16} aria-hidden="true" />
+      Print single-sided at actual size (100%).
+    </p>
+  </div>
+
+  <h2 class="activity-heading">Print individual activities</h2>
+  <ul class="pack-activities">
+    {activities.map(({ part, title, details }) => (
+      <li>
+        <div class:list={['activity-art', part]} aria-hidden="true">
+          {part === 'bingo' && (
+            <div class="mini-board">
+              <span class="paper-title">Bingo</span>
+              <div class="paper-grid">
+                {cardWords.map((word) => <span class:list={{ free: word === 'FREE' }}>{word}</span>)}
+              </div>
+            </div>
+          )}
+          {part === 'flashcards' && (
+            <div class="mini-flashcard">
+              <img src={strawberry} width="62" height="62" loading="lazy" alt="" />
+              <span>Strawberry</span>
+            </div>
+          )}
+          {part === 'matching' && (
+            <div class="mini-match">
+              <div><img src={carrot} width="58" height="58" loading="lazy" alt="" /></div>
+              <div>Carrot</div>
+            </div>
+          )}
+        </div>
+        <div class="activity-copy">
+          <h3>{title}</h3>
+          <p>{details}</p>
+          <div class="activity-downloads">
+            {classroomPapers.map((paper) => (
+              <a
+                href={pdf(part, paper)}
+                download
+                data-classroom-download={part}
+                data-classroom-paper={paper.id}
+                aria-label={`Download ${title} (${paper.label})`}
+              >
+                <Download size={14} aria-hidden="true" />
+                {paper.label} PDF
+              </a>
+            ))}
+          </div>
+        </div>
+      </li>
+    ))}
+  </ul>
+  <p class="art-credit">
+    Preview illustrations by <a href="https://openmoji.org/">OpenMoji</a> ·
+    <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>
+  </p>
+</section>
+
+<style>
+  .pack-hero {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    align-items: center;
+    gap: clamp(24px, 5vw, 64px);
+    padding: clamp(28px, 5vw, 66px);
+    color: #f7f7e9;
+    background: #18392d;
+    border-radius: 24px;
+    overflow: hidden;
+  }
+  .pack-hero h1 {
+    color: inherit;
+    font-size: clamp(36px, 5vw, 67px);
+    line-height: 1.03;
+    letter-spacing: -0.045em;
+    margin-bottom: 22px;
+  }
+  .pack-hero h1 em {
+    color: #f2d59a;
+    letter-spacing: -0.055em;
+  }
+  .pack-kicker {
+    color: #c6dabd;
+    letter-spacing: 0.025em;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .pack-intro {
+    color: #dae6d6;
+    font-size: clamp(16px, 1.8vw, 19px);
+    max-width: 41ch;
+    margin-bottom: 26px;
+  }
+  .hero-actions,
+  .pack-downloads,
+  .activity-downloads {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-actions a,
+  .pack-downloads a,
+  .activity-downloads a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-size: 14px;
+    line-height: 1.3;
+    font-weight: 700;
+  }
+  .hero-download {
+    color: #25332b;
+    background: #f2d59a;
+  }
+  .hero-download:hover {
+    background: #ffe2a9;
+  }
+  .hero-customize {
+    color: #f2f6ed;
+    border: 1px solid #96ad9d;
+  }
+  .hero-formats {
+    margin: 15px 0 0;
+    color: #bad0be;
+    font-size: 13px;
+  }
+  .hero-art {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1.1;
+    background: radial-gradient(ellipse at center, #3d624f, transparent 72%);
+  }
+  .hero-board,
+  .hero-flashcard {
+    background: #fffdf2;
+    color: #24362d;
+    box-shadow: 0 16px 36px #10281e69;
+    border: 1px solid #d2d8c6;
+  }
+  .hero-board {
+    width: 74%;
+    padding: 6% 5%;
+    border-radius: 10px;
+    transform: translate(-12%, -6%) rotate(-8deg);
+  }
+  .paper-title {
+    display: block;
+    margin-bottom: 9px;
+    text-align: center;
+    font-weight: 700;
+  }
+  .paper-letters {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .paper-letters span {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #dce6d3;
+    font-size: 11px;
+  }
+  .paper-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid #a5b19e;
+    border-left: 1px solid #a5b19e;
+  }
+  .paper-grid span {
+    display: grid;
+    place-items: center;
+    min-height: 0;
+    aspect-ratio: 1.17;
+    border-right: 1px solid #a5b19e;
+    border-bottom: 1px solid #a5b19e;
+    font-size: clamp(7px, 1vw, 12px);
+    text-align: center;
+  }
+  .paper-grid .free {
+    background: #dce6d3;
+    font-weight: 700;
+  }
+  .hero-flashcard {
+    position: absolute;
+    bottom: 0;
+    right: 1%;
+    width: 41%;
+    display: grid;
+    justify-items: center;
+    padding: 4% 2%;
+    border-radius: 8px;
+    transform: rotate(10deg);
+    font-size: clamp(16px, 2.4vw, 28px);
+    font-weight: 700;
+  }
+  .hero-flashcard img {
+    display: block;
+    width: 78%;
+    height: auto;
+  }
+  .classroom-pack {
+    margin: clamp(24px, 4vw, 46px) 0 45px;
+    scroll-margin-top: 18px;
+  }
+  .pack-download-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 20px;
+    row-gap: 10px;
+    align-items: center;
+    padding: clamp(18px, 3vw, 30px);
+    background: #f5eddb;
+    border: 1px solid #e5d9bf;
+    border-radius: 16px;
+  }
+  .pack-download-panel h2 {
+    margin-bottom: 6px;
+  }
+  .pack-download-panel p {
+    margin: 0;
+    color: #515d50;
+  }
+  .pack-downloads a {
+    color: #fff;
+    background: #285141;
+  }
+  .pack-downloads a:hover {
+    background: #18392d;
+  }
+  .print-note {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+  .activity-heading {
+    margin: 32px 0 15px;
+  }
+  .pack-activities {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .pack-activities li {
+    display: grid;
+    grid-template-rows: 142px 1fr;
+    overflow: hidden;
+    border: 1px solid #dce4d9;
+    background: #fff;
+    border-radius: 14px;
+  }
+  .activity-art {
+    display: grid;
+    place-items: center;
+    color: #24362d;
+    background: #e4eddf;
+  }
+  .activity-art.flashcards {
+    background: #f6e8cd;
+  }
+  .activity-art.matching {
+    background: #f1e3db;
+  }
+  .mini-board,
+  .mini-flashcard,
+  .mini-match div {
+    background: #fffdf4;
+    box-shadow: 0 5px 12px #40453329;
+    border: 1px solid #d2d8c6;
+    border-radius: 5px;
+  }
+  .mini-board {
+    width: 123px;
+    padding: 7px;
+    transform: rotate(-5deg);
+  }
+  .mini-board .paper-title {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+  .mini-board .paper-grid span {
+    aspect-ratio: 1.6;
+    font-size: 6.5px;
+  }
+  .mini-flashcard {
+    display: grid;
+    justify-items: center;
+    padding: 7px 16px 10px;
+    transform: rotate(6deg);
+    font-weight: 700;
+  }
+  .mini-match {
+    display: flex;
+    gap: 9px;
+    transform: rotate(-5deg);
+  }
+  .mini-match div {
+    display: grid;
+    place-items: center;
+    width: 70px;
+    height: 67px;
+    border-style: dashed;
+    font-weight: 700;
+  }
+  .activity-copy {
+    display: flex;
+    flex-direction: column;
+    padding: 17px;
+  }
+  .activity-copy h3 {
+    margin-bottom: 5px;
+  }
+  .activity-copy p {
+    margin-bottom: 14px;
+  }
+  .activity-downloads {
+    margin-top: auto;
+    gap: 6px;
+  }
+  .activity-downloads a {
+    color: #285141;
+    border: 1px solid #d9e3d7;
+    padding-inline: 10px;
+  }
+  .activity-downloads a:hover {
+    background: #eef4ea;
+  }
+  .art-credit {
+    margin: 12px 0 0;
+    color: #566257;
+    font-size: 11px;
+  }
+  .art-credit a {
+    text-decoration: underline;
+  }
+  @media (max-width: 870px) {
+    .pack-download-panel {
+      grid-template-columns: 1fr;
+    }
+    .pack-hero {
+      gap: 22px;
+    }
+  }
+  @media (max-width: 680px) {
+    .pack-hero {
+      grid-template-columns: 1fr;
+      border-radius: 18px;
+    }
+    .hero-art {
+      width: min(100%, 340px);
+      justify-self: center;
+    }
+    .pack-activities {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 370px) {
+    .pack-hero h1 {
+      font-size: 32px;
+    }
+  }
+</style>

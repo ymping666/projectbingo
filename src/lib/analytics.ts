@@ -1,7 +1,9 @@
 import { presetIds, publicPaths } from './routes';
 import { productionBuild, productionOrigin } from './deployment';
 import type { Project } from './model';
+import { classroomDownloadEvents } from './food-classroom';
 export type AnalyticsEvent =
+  | (typeof classroomDownloadEvents)[keyof typeof classroomDownloadEvents]
   | 'caller_start'
   | 'sample_download'
   | 'template_used'
@@ -21,6 +23,7 @@ export type EventInput = {
 };
 export type SafePayload = Record<string, string | number | boolean>;
 const events = new Set<AnalyticsEvent>([
+  ...Object.values(classroomDownloadEvents),
   'caller_start',
   'sample_download',
   'template_used',

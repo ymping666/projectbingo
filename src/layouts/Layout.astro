@@ -169,6 +169,11 @@ const path = routePath(Astro.url.pathname);
     <Feedback />
     <script>
       import { track } from '../lib/analytics';
+      import {
+        classroomDownloadEvents,
+        foodClassroomTemplate,
+        type ClassroomDownload,
+      } from '../lib/food-classroom';
       document.addEventListener('click', (event) => {
         const link =
           event.target instanceof Element
@@ -182,6 +187,16 @@ const path = routePath(Astro.url.pathname);
           track('sample_download', {
             templateId: sample.dataset.sampleDownload,
             exportType: 'sample',
+          });
+        const classroom =
+          event.target instanceof Element
+            ? event.target.closest<HTMLAnchorElement>('a[data-classroom-download]')
+            : null;
+        const part = classroom?.dataset.classroomDownload;
+        if (part && Object.hasOwn(classroomDownloadEvents, part))
+          track(classroomDownloadEvents[part as ClassroomDownload], {
+            templateId: foodClassroomTemplate,
+            paper: classroom?.dataset.classroomPaper,
           });
         if (link)
           track('template_used', {

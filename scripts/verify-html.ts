@@ -4,6 +4,13 @@ import assert from 'node:assert/strict';
 import { publicPaths } from '../src/lib/routes';
 import { templates } from '../src/lib/templates';
 import { featuredIds, sampleFilename } from '../src/lib/samples';
+import {
+  classroomDownloadEvents,
+  classroomFilename,
+  classroomPapers,
+  foodClassroomTemplate,
+  type ClassroomDownload,
+} from '../src/lib/food-classroom';
 const preview = process.argv[2] === 'preview';
 const directory = preview ? 'dist-preview' : 'dist';
 const base = preview ? '/projectbingo/' : '/';
@@ -86,6 +93,21 @@ for (const t of templates) {
   assert(html.includes(`data-template-use="${t.id}"`));
   if (featuredIds.includes(t.id))
     assert(html.includes(`${base}samples/${sampleFilename(t.id)}`));
+  if (t.id === foodClassroomTemplate) {
+    for (const label of ['Classroom Bingo', 'Picture flashcards', 'Matching game'])
+      assert(html.includes(`>${label}</h3>`), `Missing activity title: ${label}`);
+    for (const part of Object.keys(classroomDownloadEvents) as ClassroomDownload[]) {
+      for (const paper of classroomPapers) {
+        const href = `${base}samples/${classroomFilename(part, paper)}`;
+        assert(
+          html.includes(`href="${href}" download data-classroom-download="${part}" data-classroom-paper="${paper.id}"`),
+          `Missing classroom download or event attributes for ${href}`,
+        );
+      }
+    }
+  } else {
+    assert(!html.includes('data-classroom-download='), t.id);
+  }
 }
 const sitemap = await readFile(`${directory}/sitemap.xml`, 'utf8');
 assert(!sitemap.includes('/host/'));

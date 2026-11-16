@@ -17,7 +17,8 @@
     "build:production": "node scripts/build.mjs production",
     "build:preview": "node scripts/build.mjs preview",
     "qa:html:preview": "tsx scripts/verify-html.ts preview",
-    "samples": "tsx scripts/generate-samples.ts"
+    "samples": "tsx scripts/generate-samples.ts",
+    "samples:food": "tsx scripts/generate-food-classroom.ts"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.0",

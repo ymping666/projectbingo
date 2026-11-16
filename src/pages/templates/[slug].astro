@@ -6,6 +6,8 @@ import { sampleProject, sampleFilename } from '../../lib/samples';
 import { featured, related } from '../../lib/template-content';
 import { CardView } from '../../components/shared';
 import AdSlot from '../../components/AdSlot.astro';
+import FoodClassroomPack from '../../components/FoodClassroomPack.astro';
+import { foodClassroomTemplate } from '../../lib/food-classroom';
 export function getStaticPaths() {
   return templates.map((t) => ({ params: { slug: t.id }, props: { t } }));
 }
@@ -13,6 +15,7 @@ const { t } = Astro.props;
 const p = sampleProject(t);
 const content = featured[t.id];
 const christmas = t.id === 'christmas-bingo';
+const hasClassroomPack = t.id === foodClassroomTemplate;
 const recommendations = (t.relatedIds || related[t.id] || []).map(
   (id) => templates.find((other) => other.id === id)!,
 );
@@ -21,7 +24,7 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
 <Layout title={t.seoTitle || `${t.name} Bingo cards`} description={t.description}
   ><div class="breadcrumbs">
     <a href={withBase('/templates/')}>All templates</a><span>/</span>{t.name}
-  </div><section class="template-detail">
+  </div>{hasClassroomPack ? <FoodClassroomPack templateSize={t.size} /> : <section class="template-detail">
     <div>
       <div class="eyebrow">{t.category.toUpperCase()}</div><h1>
         {t.name}<br /><em>Bingo.</em>
@@ -69,7 +72,7 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
         colors.
       </p>
     </div>
-  </section>
+  </section>}
   {
     t.notes && (
       <article class="article">
@@ -105,7 +108,7 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
       <article class="article template-notes">
         <section>
           <>
-            <h2>A game for your group</h2>
+            <h2>{hasClassroomPack ? 'Customize the 50-word Bingo template' : 'A game for your group'}</h2>
             <p>{content.scene}</p>
           </>
         </section>
@@ -140,8 +143,8 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
             <h2>Download an example game pack</h2>
             <p>
               See two sample cards, the complete caller list and the rules in a
-              real A4 PDF, with two cards per page. The card shown above belongs
-              to this sample.
+              real A4 PDF, with two cards per page.
+              {!hasClassroomPack && ' The card shown above belongs to this sample.'}
             </p>
           </>
           <a
@@ -264,7 +267,7 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
     <div class="section-title">
       <div>
         <div class="section-eyebrow">WHAT’S IN THE GAME</div><h2>
-          {t.id === 'christmas-bingo' ? 'Christmas Bingo word list' : 'The complete word list'}
+          {christmas ? 'Christmas Bingo word list' : hasClassroomPack ? 'The 50-word Bingo list' : 'The complete word list'}
         </h2>
       </div><span>{t.words.length} distinct entries</span>
     </div><ul>{t.words.map((w: string) => <li>{w}</li>)}</ul>
