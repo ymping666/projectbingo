@@ -1174,6 +1174,15 @@ details select {
 .template-detail .button {
   margin-bottom: 40px;
 }
+.template-actions,
+.blank-downloads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.template-detail .template-actions .button {
+  margin-bottom: 0;
+}
 .template-detail h2 {
   font-size: 23px;
 }

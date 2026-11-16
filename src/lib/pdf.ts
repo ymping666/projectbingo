@@ -1,4 +1,11 @@
-import { PDFDocument, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
+import {
+  PDFDocument,
+  PDFName,
+  PDFString,
+  rgb,
+  type PDFFont,
+  type PDFPage,
+} from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import type { Project } from './model';
 import { withBase } from './url';
@@ -130,6 +137,7 @@ export async function exportPdf(
   pack: boolean,
   fontBytes?: Uint8Array,
   progress: (done: number) => void = () => {},
+  sampleUrl?: string,
 ): Promise<ExportResult> {
   const doc = await PDFDocument.create();
   doc.registerFontkit(fontkit);
@@ -349,6 +357,25 @@ export async function exportPdf(
       }
       y -= 14;
     });
+  }
+  if (sampleUrl) {
+    const firstPage = doc.getPage(0);
+    const label = sampleUrl.replace('https://', '');
+    const size = 10;
+    const width = font.widthOfTextAtSize(label, size);
+    const x = pw - margin - width;
+    const y = 19;
+    firstPage.drawText(label, {
+      x, y, size, font, color: rgb(0.13, 0.35, 0.25),
+    });
+    const link = doc.context.obj({
+      Type: 'Annot',
+      Subtype: 'Link',
+      Rect: [x, y - 3, x + width, y + size],
+      Border: [0, 0, 0],
+      A: { S: PDFName.of('URI'), URI: PDFString.of(sampleUrl) },
+    });
+    firstPage.node.addAnnot(doc.context.register(link));
   }
   progress(95);
   const bytes = await doc.save();

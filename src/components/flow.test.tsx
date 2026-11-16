@@ -342,7 +342,7 @@ it('keeps existing saved activity byte-for-byte through blank options and downlo
     ),
   );
   await user.click(screen.getByLabelText('Center FREE space'));
-  await user.click(screen.getByRole('button', { name: 'Download blank PDF' }));
+  await user.click(screen.getByRole('button', { name: 'Download 5 × 5 PDF' }));
   await screen.findByText(/Blank PDF ready/);
   expect(localStorage.getItem(STORAGE_KEY)).toBe(original);
   expect(blobs).toHaveLength(1);

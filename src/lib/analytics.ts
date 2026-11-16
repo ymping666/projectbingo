@@ -69,8 +69,39 @@ export function safeParameters(input: EventInput = {}): SafePayload {
   return result;
 }
 export function safePageLocation(pathname: string) {
+  return productionOrigin + safePath(pathname);
+}
+function safePath(pathname: string) {
   const path = pathname.split(/[?#]/)[0];
-  return productionOrigin + (routes.has(path) ? path : '/404/');
+  return routes.has(path) ? path : '/404/';
+}
+const LANDING_KEY = 'bingo-card-kit:analytics-landing';
+const LANDING_TIMEOUT = 30 * 60 * 1000;
+type Landing = { path: string; lastSeen: number };
+let landing: Landing | undefined;
+function landingPagePath(): string {
+  const now = Date.now();
+  if (!landing) {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(LANDING_KEY) || 'null');
+      if (
+        typeof saved?.path === 'string' &&
+        safePath(saved.path) === saved.path &&
+        typeof saved.lastSeen === 'number'
+      )
+        landing = saved;
+    } catch {}
+  }
+  const elapsed = landing ? now - landing.lastSeen : Infinity;
+  const path =
+    landing && elapsed >= 0 && elapsed < LANDING_TIMEOUT
+      ? landing.path
+      : safePath(location.pathname);
+  landing = { path, lastSeen: now };
+  try {
+    sessionStorage.setItem(LANDING_KEY, JSON.stringify(landing));
+  } catch {}
+  return path;
 }
 // Only fixed public origins are reported; never transmit the original referrer.
 export function safeReferrer(referrer: string): string {
@@ -176,6 +207,10 @@ export async function setAnalyticsConsent(allow: boolean): Promise<boolean> {
     !allow;
   if (!allow) {
     active = false;
+    landing = undefined;
+    try {
+      sessionStorage.removeItem(LANDING_KEY);
+    } catch {}
     disableCookies();
     return true;
   }
@@ -220,6 +255,7 @@ export async function setAnalyticsConsent(allow: boolean): Promise<boolean> {
     cookie_domain: 'none',
     cookie_flags: 'SameSite=Lax;Secure',
   });
+  landingPagePath();
   loading = new Promise<boolean>((resolve) => {
     const script = document.createElement('script');
     script.async = true;
@@ -238,6 +274,7 @@ export async function setAnalyticsConsent(allow: boolean): Promise<boolean> {
           page_location: safePageLocation(location.pathname),
           page_title: 'Bingo Card Kit',
           page_referrer: referrer,
+          landing_page_path: landingPagePath(),
         });
       resolve(active);
     };
@@ -251,7 +288,11 @@ export async function setAnalyticsConsent(allow: boolean): Promise<boolean> {
   return loading;
 }
 export const track = createTracker(
-  (event, payload) => (window as GAWindow).gtag?.('event', event, payload),
+  (event, payload) =>
+    (window as GAWindow).gtag?.('event', event, {
+      ...payload,
+      landing_page_path: landingPagePath(),
+    }),
   () => eligible() && consent && active,
   () => location.pathname,
 );

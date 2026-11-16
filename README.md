@@ -60,4 +60,6 @@ Manual events: `template_used`, `generation_success`, `export_success`, `export_
 
 Local adapter/DOM test success is separate from a deployed real ID and from confirmed GA4 Realtime/DebugView receipt. Do not claim live analytics until the platform actually shows the events.
 
+For the template funnel, use the event-scoped GA4 custom dimension **Landing page path** (`landing_page_path`). Filter or break down an exploration by that dimension and use `template_used`, `generation_success` and `export_success` in order. Compare `sample_download` separately for fixed samples, and use `export_type=blank` for the blank card flow. The path is the first known page in the current browser tab, starts over after 30 minutes without a tracked activity, and contains no query or fragment.
+
 Blank sheets use a separate PDF model, never the project word pool or activity storage. Alphabet presets are separate cases on one template page. Cloudflare platform statistics are separate from GA4 preferences; Privacy describes both, without assuming beacon injection or receipt is uniform across responses.

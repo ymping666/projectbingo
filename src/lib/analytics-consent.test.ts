@@ -4,6 +4,9 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 beforeEach(() => {
   vi.resetModules();
   localStorage.clear();
+  sessionStorage.clear();
+  const gaWindow = window as unknown as { dataLayer?: IArguments[] };
+  delete gaWindow.dataLayer;
   for (const [key, value] of Object.entries({
     PUBLIC_DEPLOYMENT: 'production',
     PUBLIC_INDEXABLE_BUILD: 'true',
@@ -111,4 +114,42 @@ it('sends a fixed referrer for recognized sources and never the original URL', a
   expect(json).not.toContain('/r/example');
   expect(json).not.toContain('secret');
   expect(json).not.toContain('ignore_referrer');
+});
+
+it('keeps the sanitized landing page across a template-to-maker navigation', async () => {
+  const originalUrl = location.href;
+  const load = async () => {
+    const a = await import('./analytics');
+    const loading = a.setAnalyticsConsent(true);
+    const script = vi.mocked(document.head.append).mock.calls.at(-1)![0] as HTMLScriptElement;
+    script.dispatchEvent(new Event('load'));
+    await loading;
+    return a;
+  };
+  const events = () =>
+    (window as unknown as { dataLayer: IArguments[] }).dataLayer
+      .map((args) => Array.from(args))
+      .filter(([type]) => type === 'event');
+  try {
+    history.replaceState(null, '', '/classroom-bingo/?private=secret');
+    const guide = await load();
+    guide.track('template_used', { templateId: 'sight-word-bingo' });
+    history.replaceState(null, '', '/?template=sight-word-bingo');
+    vi.resetModules();
+    const maker = await load();
+    maker.track('generation_success');
+    maker.track('export_success');
+    for (const name of ['template_used', 'generation_success', 'export_success'])
+      expect(events().find((event) => event[1] === name)?.[2]).toMatchObject({
+        landing_page_path: '/classroom-bingo/',
+      });
+    expect(JSON.stringify(events())).not.toContain('secret');
+    vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 30 * 60 * 1000);
+    maker.track('export_success');
+    expect(events().at(-1)?.[2]).toMatchObject({ landing_page_path: '/' });
+    await maker.setAnalyticsConsent(false);
+    expect(sessionStorage.getItem('bingo-card-kit:analytics-landing')).toBeNull();
+  } finally {
+    history.replaceState(null, '', originalUrl);
+  }
 });

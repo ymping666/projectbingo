@@ -12,6 +12,7 @@ export function getStaticPaths() {
 const { t } = Astro.props;
 const p = sampleProject(t);
 const content = featured[t.id];
+const christmas = t.id === 'christmas-bingo';
 const recommendations = (t.relatedIds || related[t.id] || []).map(
   (id) => templates.find((other) => other.id === id)!,
 );
@@ -29,12 +30,25 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
       >
         <span>{t.words.length} words</span><span>{t.size} × {t.size} grid</span
         ><span>Free to customize</span>
-      </div><a
+      </div><div class:list={{ 'template-actions': christmas }}><a
         class="button primary"
         href={withBase(`/?template=${t.id}`)}
         data-template-use={t.id}
         data-template-size={t.size}>Use this template <span>↗</span></a
-      >{t.id === 'christmas-bingo' && <p><a href="#word-list">See all {t.words.length} Christmas Bingo words</a></p>}
+      >{christmas && (
+        <a
+          class="button secondary"
+          href={withBase(`/samples/${sampleFilename(t.id)}`)}
+          download
+          data-sample-download={t.id}
+        >Download sample PDF</a>
+      )}</div>
+      {christmas && (
+        <p>
+          Sample PDF includes 2 cards, the complete caller word list, and rules.
+          <br /><a href="#word-list">See all {t.words.length} Christmas Bingo words</a>
+        </p>
+      )}
       <h2>At your next gathering</h2><p>{t.tip}</p><p>
         {
           t.mode === 'observed'

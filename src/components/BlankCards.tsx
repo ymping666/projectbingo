@@ -13,22 +13,24 @@ export default function BlankCards() {
   const [message, setMessage] = useState(''),
     [busy, setBusy] = useState(false);
   const lock = useRef(false);
-  async function save() {
+  async function save(size: BlankOptions['size']) {
     if (lock.current) return;
+    const selected = { ...options, size };
     lock.current = true;
+    setOptions(selected);
     setBusy(true);
     setMessage('');
     try {
       const { blankPdf } = await import('../lib/blank');
-      const bytes = await blankPdf(options);
+      const bytes = await blankPdf(selected);
       download(
         bytes as BlobPart,
-        `bingo-card-kit-blank-${options.size}x${options.size}-${options.paper}-${options.free ? 'free' : 'no-free'}.pdf`,
+        `bingo-card-kit-blank-${size}x${size}-${selected.paper}-${selected.free ? 'free' : 'no-free'}.pdf`,
         'application/pdf',
       );
       track('export_success', {
-        size: options.size,
-        paper: options.paper,
+        size,
+        paper: selected.paper,
         count: 1,
         perPage: 1,
         exportType: 'blank',
@@ -53,7 +55,16 @@ export default function BlankCards() {
       aria-label="Blank card options and preview"
     >
       <div className="blank-options">
-        <h2>Make a handwriting sheet</h2>
+        <h2>Download a blank grid</h2>
+        <div className="blank-downloads" aria-busy={busy}>
+          <button className="button primary" disabled={busy} onClick={() => void save(3)}>
+            Download 3 × 3 PDF
+          </button>
+          <button className="button secondary" disabled={busy} onClick={() => void save(5)}>
+            Download 5 × 5 PDF
+          </button>
+        </div>
+        <p role="status">{busy ? 'Making PDF…' : message}</p>
         <ChoiceGroup
           label="Grid size"
           value={options.size}
@@ -86,10 +97,6 @@ export default function BlankCards() {
           One blank card per sheet. Print multiple copies for your group. These
           sheets have no digital card IDs.
         </p>
-        <button className="button primary" disabled={busy} onClick={save}>
-          {busy ? 'Making PDF…' : 'Download blank PDF'}
-        </button>
-        <p role="status">{message}</p>
         <p>Your saved activity and calling progress are unaffected.</p>
       </div>
       <div
