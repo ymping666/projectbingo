@@ -18,6 +18,7 @@ const linkPath = (id: string) =>
       {g.description}
     </p>
   </section>
+  <slot name="after-intro" />
   {
     t && p && (
       <section class="template-detail">

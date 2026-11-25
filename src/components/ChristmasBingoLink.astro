@@ -1,0 +1,33 @@
+---
+import { withBase } from '../lib/url';
+---
+
+<p class="christmas-bingo-link">
+  <a href={withBase('/templates/christmas-bingo/')}>
+    Printable Christmas Bingo cards <span aria-hidden="true">↗</span>
+  </a>
+  <span>Print two sample cards and a caller list, or make your own set.</span>
+</p>
+
+<style>
+  .christmas-bingo-link {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 16px;
+    margin: 0 0 24px;
+    padding: 14px 18px;
+    border: 1px solid #dce5d6;
+    border-radius: 12px;
+    background: #eef4e9;
+    color: #3d4f3b;
+    font-size: 14px;
+  }
+
+  a {
+    color: #284a32;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

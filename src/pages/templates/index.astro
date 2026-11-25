@@ -6,6 +6,7 @@ import { sampleProject } from '../../lib/samples';
 import { CardView } from '../../components/shared';
 import { guides } from '../../lib/guides';
 import AdSlot from '../../components/AdSlot.astro';
+import ChristmasBingoLink from '../../components/ChristmasBingoLink.astro';
 ---
 
 <Layout
@@ -18,7 +19,7 @@ import AdSlot from '../../components/AdSlot.astro';
       {templates.length} ready-to-use templates. Words, letters and numbers, free
       to print, edit and play.
     </p>
-  </section><p class="honest-note">
+  </section><ChristmasBingoLink /><p class="honest-note">
     <a href={withBase('/classroom-bingo/')}
       >Choose and organize a classroom activity</a
     > · <a href={withBase('/blank-bingo-cards/')}
