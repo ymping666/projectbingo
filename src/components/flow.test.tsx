@@ -277,6 +277,44 @@ it('offers both dirty download branches and exports the exact new snapshot, with
     vi.mocked(track).mock.calls.filter((c) => c[0] === 'export_success'),
   ).toHaveLength(2);
 }, 30000);
+it('shows invalid edits near the action and excludes them from PDF export errors', async () => {
+  const user = userEvent.setup();
+  const original = initial();
+  render(<Editor initial={original} />);
+  await screen.findByText('Saved on this browser');
+  await user.clear(screen.getByLabelText('Card title'));
+
+  await user.click(
+    screen.getByRole('button', { name: 'Generate new card set' }),
+  );
+  const generationError = await screen.findByRole('alert');
+  expect(generationError.closest('.editor-body')).toBeTruthy();
+  expect(generationError.textContent).toContain('Enter a title of 1–80 characters');
+
+  await user.click(screen.getByRole('button', { name: 'Download cards only' }));
+  await user.click(
+    screen.getByRole('button', { name: 'Generate new set & download' }),
+  );
+  const downloadError = await screen.findByRole('alert');
+  expect(downloadError.closest('.export-area')).toBeTruthy();
+  expect(downloadError.textContent).toContain('Enter a title of 1–80 characters');
+  expect(stored().id).toBe(original.id);
+  expect(blobs).toHaveLength(0);
+  expect(track).not.toHaveBeenCalled();
+
+  vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 503 }));
+  await user.click(screen.getByRole('button', { name: 'Download cards only' }));
+  await user.click(
+    screen.getByRole('button', { name: 'Download current card set' }),
+  );
+  const fontError = await screen.findByRole('alert');
+  expect(fontError.closest('.export-area')).toBeTruthy();
+  expect(fontError.textContent).toContain('PDF font could not load');
+  expect(track).toHaveBeenCalledWith(
+    'export_error',
+    expect.objectContaining({ exportType: 'cards', errorCode: 'font_load' }),
+  );
+});
 it('counts first actual call once across undo-to-zero, refresh and the independent host; imports old JSON without changing cards', async () => {
   const user = userEvent.setup();
   const legacy = JSON.parse(

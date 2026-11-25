@@ -20,15 +20,15 @@ const initial = generate(templateDraft(food), {
         Free Printable<br />
         <em>Bingo Card Generator</em>
       </h1><p>
-        Customize your cards, download a real PDF, and host the same activity.
-        Free, with no sign-up. Good times start with a Bingo.
+        Make Bingo cards from your own words, print them as a PDF, and host
+        the same game online.
       </p>
-    </div><div class="intro-note">
-      <span aria-hidden="true">✳</span><p>
-        For the classroom.<br />For the party.<br /><strong
-          >For the fun of it.</strong
-        >
-      </p>
+      <nav class="quick-print" aria-label="Ready-to-print options">
+        <a href={withBase('/blank-bingo-cards/')}>Print blank Bingo cards</a>
+        <a href={withBase('/templates/food-vocabulary-bingo/')}>
+          Food Vocabulary classroom pack
+        </a>
+      </nav>
     </div>
   </section><Editor initial={initial} client:load /><div class="trust-strip">
     <span>✓ Always free</span><span>✓ No sign-up</span><span
@@ -68,7 +68,6 @@ const initial = generate(templateDraft(food), {
         ))
       }
     </div><p class="related-links">
-      <a href={withBase('/blank-bingo-cards/')}>Printable blank Bingo cards</a>
       <a href={withBase('/templates/christmas-bingo/')}>Christmas Bingo words and cards</a>
     </p>
   </section><section class="explainer">
@@ -95,3 +94,23 @@ const initial = generate(templateDraft(food), {
     >
   </p></Layout
 >
+
+<style>
+  .quick-print {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin-top: 12px;
+  }
+
+  .quick-print a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: #284a32;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

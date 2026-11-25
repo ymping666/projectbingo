@@ -240,26 +240,6 @@ main {
   right: -37px;
   top: -11px;
 }
-.intro-note {
-  display: flex;
-  align-items: center;
-  gap: 17px;
-  transform: rotate(-4deg);
-  margin-right: 30px;
-}
-.intro-note > span {
-  font-size: 58px;
-  color: #b6a0ca;
-}
-.intro-note p {
-  font-size: 12px;
-  line-height: 1.8;
-  color: #71816a;
-}
-.intro-note strong {
-  font-weight: 400;
-  color: #314b3a;
-}
 .workspace {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -886,12 +866,6 @@ details select {
   outline: 3px solid #8269b7;
   outline-offset: 3px;
 }
-.workspace-notices {
-  grid-column: 1/-1;
-}
-.workspace-notices:empty {
-  display: none;
-}
 .notice {
   display: flex;
   align-items: flex-start;
@@ -912,13 +886,9 @@ details select {
   background: #fff0e9;
   color: #963d28;
 }
-.draft-warning {
-  font-size: 11px;
-  text-align: center;
-  padding: 10px 15px;
-  margin: 0;
-  background: #faf5e9;
-  color: #816a40;
+.editor-body > .notice,
+.export-area > .notice {
+  margin: 12px 0 0;
 }
 .trust-strip {
   display: flex;
@@ -1499,9 +1469,6 @@ details select {
   main {
     margin: 0 36px;
   }
-  .intro-note {
-    margin-right: 0;
-  }
   .secondary-actions {
     gap: 18px;
   }
@@ -1538,9 +1505,6 @@ details select {
   }
   .intro h1 {
     font-size: 42px;
-  }
-  .intro-note {
-    display: none;
   }
   .workspace {
     grid-template-columns: 1fr 1fr;

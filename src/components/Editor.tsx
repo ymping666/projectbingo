@@ -28,13 +28,19 @@ import { HostSession } from './Host';
 import TemplatePicker from './TemplatePicker';
 import { ChoiceGroup } from './ChoiceGroup';
 import { cardTheme } from '../lib/card-themes';
+
+type EditorNotice = {
+  area: 'generation' | 'download' | 'project';
+  text: string;
+  error?: boolean;
+};
+
 export default function Editor({ initial }: { initial: Project }) {
   const { project, setProject, ready, save } = useProject(initial);
   const p = project!;
   const [draft, setDraft] = useState<Draft>(draftOf(initial)),
     [index, setIndex] = useState(0),
-    [message, setMessage] = useState(''),
-    [error, setError] = useState(''),
+    [notice, setNotice] = useState<EditorNotice | null>(null),
     [busy, setBusy] = useState(''),
     [progress, setProgress] = useState(0),
     [hosting, setHosting] = useState(false),
@@ -63,7 +69,6 @@ export default function Editor({ initial }: { initial: Project }) {
     setProject(next);
     setDraft(draftOf(next));
     setIndex(0);
-    setError('');
   };
   let count = 0,
     duplicates = 0,
@@ -99,19 +104,26 @@ export default function Editor({ initial }: { initial: Project }) {
   }
   async function make() {
     if (operation.current || !ready) return;
-    setError('');
-    setMessage('');
+    setNotice(null);
     try {
       if ((dirty || p.round.started) && !confirmNew()) return;
       operation.current = true;
       setBusy('Generating cards');
       await new Promise((r) => setTimeout(r, 20));
       const next = createDraftSnapshot();
-      setMessage(
-        `Created ${next.cards.length} distinct card layouts. Project ${next.id}.`,
-      );
+      setNotice({
+        area: 'generation',
+        text: `Created ${next.cards.length} distinct card layouts. Project ${next.id}.`,
+      });
     } catch (e) {
-      setError((e as Error).message);
+      setNotice({
+        area: 'generation',
+        text:
+          e instanceof Error
+            ? e.message
+            : 'Could not generate cards. Try again.',
+        error: true,
+      });
     } finally {
       setBusy('');
       operation.current = false;
@@ -120,6 +132,7 @@ export default function Editor({ initial }: { initial: Project }) {
   function pdf(pack: boolean) {
     if (operation.current || !ready) return;
     if (dirty) {
+      setNotice(null);
       setDownloadChoice(pack);
       return;
     }
@@ -131,9 +144,10 @@ export default function Editor({ initial }: { initial: Project }) {
     operation.current = true;
     setDownloadChoice(null);
     let snapshot = p,
-      stage: 'export' | 'download' = 'export';
-    setError('');
-    setMessage('');
+      stage: 'generation' | 'export' | 'download' = fresh
+        ? 'generation'
+        : 'export';
+    setNotice(null);
     setBusy(pack ? 'Making game pack' : 'Making card PDF');
     setProgress(0);
     try {
@@ -141,6 +155,7 @@ export default function Editor({ initial }: { initial: Project }) {
         setBusy('Generating cards');
         await new Promise((r) => setTimeout(r, 20));
         snapshot = createDraftSnapshot();
+        stage = 'export';
         setBusy(pack ? 'Making game pack' : 'Making card PDF');
       }
       const { exportPdf } = await import('../lib/pdf');
@@ -151,20 +166,32 @@ export default function Editor({ initial }: { initial: Project }) {
         `bingo-card-kit-${snapshot.id}-${pack ? 'game-pack' : 'cards'}.pdf`,
         'application/pdf',
       );
-      setMessage(
-        `PDF ready: ${result.cardPages} card pages${pack ? ` + ${result.extraPages} caller and rules pages` : ''}. Print at Actual size / 100%.`,
-      );
+      setNotice({
+        area: 'download',
+        text: `PDF ready: ${result.cardPages} card pages${pack ? ` + ${result.extraPages} caller and rules pages` : ''}. Print at Actual size / 100%.`,
+      });
       track('export_success', {
         ...projectParameters(snapshot),
         exportType: pack ? 'game_pack' : 'cards',
       });
     } catch (e) {
-      setError((e as Error).message);
-      track('export_error', {
-        ...projectParameters(snapshot),
-        exportType: pack ? 'game_pack' : 'cards',
-        errorCode: stage === 'download' ? 'download_error' : exportErrorCode(e),
+      setNotice({
+        area: 'download',
+        text:
+          stage === 'download'
+            ? 'The completed PDF could not download. Try downloading it again.'
+            : e instanceof Error
+              ? e.message
+              : 'Could not prepare the PDF. Try again.',
+        error: true,
       });
+      if (stage !== 'generation')
+        track('export_error', {
+          ...projectParameters(snapshot),
+          exportType: pack ? 'game_pack' : 'cards',
+          errorCode:
+            stage === 'download' ? 'download_error' : exportErrorCode(e),
+        });
     } finally {
       setBusy('');
       operation.current = false;
@@ -442,6 +469,9 @@ export default function Editor({ initial }: { initial: Project }) {
               ? 'Content changed. Generate to apply it to a new project.'
               : 'Different layouts. One shared activity. Ready to print.'}
           </p>
+          {notice?.area === 'generation' && (
+            <Notice error={notice.error}>{notice.text}</Notice>
+          )}
         </div>
       </div>
       <div className="preview-panel">
@@ -612,6 +642,9 @@ export default function Editor({ initial }: { initial: Project }) {
               </a>
             )}
           </div>
+          {notice?.area === 'download' && (
+            <Notice error={notice.error}>{notice.text}</Notice>
+          )}
           <p className="print-tip">
             Print at Actual size (100%).{' '}
             <a href={withBase('/printing-guide/')}>Printing tips ↗</a>
@@ -623,22 +656,10 @@ export default function Editor({ initial }: { initial: Project }) {
           <ProjectTools
             project={p}
             onImport={imported}
-            onMessage={(s) => {
-              setMessage(s);
-              setError('');
-            }}
+            onMessage={(text) => setNotice({ area: 'project', text })}
           />
         </div>
-      </div>
-      <div className="workspace-notices">
-        {error && <Notice error>{error}</Notice>}
-        {message && <Notice>{message}</Notice>}
-        {dirty && (
-          <p className="draft-warning">
-            Preview, downloads, and hosting use project <strong>{p.id}</strong>{' '}
-            until you generate your edited words.
-          </p>
-        )}
+        {notice?.area === 'project' && <Notice>{notice.text}</Notice>}
       </div>
     </section>
   );

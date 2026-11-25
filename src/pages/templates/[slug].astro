@@ -33,23 +33,22 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
       >
         <span>{t.words.length} words</span><span>{t.size} × {t.size} grid</span
         ><span>Free to customize</span>
-      </div><div class:list={{ 'template-actions': christmas }}><a
+      </div><div class="template-actions"><a
         class="button primary"
         href={withBase(`/?template=${t.id}`)}
         data-template-use={t.id}
         data-template-size={t.size}>Use this template <span>↗</span></a
-      >{christmas && (
+      >
         <a
           class="button secondary"
           href={withBase(`/samples/${sampleFilename(t.id)}`)}
           download
           data-sample-download={t.id}
-        >Download sample PDF</a>
-      )}</div>
+        >Download sample PDF</a></div>
+      <p>The A4 sample includes two cards and instructions.</p>
       {christmas && (
         <p>
-          Sample PDF includes 2 cards, the complete caller word list, and rules.
-          <br /><a href="#word-list">See all {t.words.length} Christmas Bingo words</a>
+          <a href="#word-list">See all {t.words.length} Christmas Bingo words</a>
         </p>
       )}
       <h2>At your next gathering</h2><p>{t.tip}</p><p>
@@ -138,13 +137,12 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
             </ul>
           </>
         </section>
-        <section>
+        {hasClassroomPack && <section>
           <>
             <h2>Download an example game pack</h2>
             <p>
               See two sample cards, the complete caller list and the rules in a
               real A4 PDF, with two cards per page.
-              {!hasClassroomPack && ' The card shown above belongs to this sample.'}
             </p>
           </>
           <a
@@ -161,7 +159,7 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
             template, generate a new card set, save its project JSON and start
             hosting that same activity.
           </p>
-        </section>
+        </section>}
       </article>
     )
   }
@@ -236,30 +234,6 @@ const recommendations = (t.relatedIds || related[t.id] || []).map(
             </section>
           );
         })}
-      </section>
-    )
-  }
-  {
-    (t.notes || (!content && !t.variants)) && (
-      <section class="article">
-        <>
-          <h2>Inspect a fixed sample</h2>
-          <p>
-            This A4 PDF contains two example cards, a checklist and rules. It is
-            separate from your saved activity.{' '}
-            {t.mode === 'observed'
-              ? 'Play by observation and confirm wins manually.'
-              : 'To use the web host, generate your own cards and retain that project JSON.'}
-          </p>
-          <a
-            class="button secondary"
-            href={withBase(`/samples/${sampleFilename(t.id)}`)}
-            download
-            data-sample-download={t.id}
-          >
-            Download sample PDF
-          </a>
-        </>
       </section>
     )
   }
